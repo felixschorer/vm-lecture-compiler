@@ -13,8 +13,8 @@ from pyparsing import (
     pyparsing_common,
 )
 
-from frontend.namespace import Namespace
-from frontend.parse_action_for import parse_action_for
+from cma.frontend.namespace import Namespace
+from cma.frontend.parse_action_for import parse_action_for
 
 ParserElement.enablePackrat()
 
@@ -99,10 +99,3 @@ C.Expression = infixNotation(
     ],
 )
 
-test = [
-    "test(3 + test(42))",
-]
-for t in test:
-    print(t)
-    print(C.Expression.parseString(t))
-    print("")
