@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any, List
 
 from pyparsing import (
+    Group,
     ParserElement,
     Suppress,
     Word,
@@ -38,12 +39,17 @@ class Identifier:
     name: str
 
 
-C.FuncCall = C.Identifier + Suppress("(") + delimitedList(C.Expression) + Suppress(")")
+C.LValue = C.Identifier
+
+
+C.FuncCall = C.Identifier + Group(
+    Suppress("(") + delimitedList(C.Expression) + Suppress(")")
+)
 
 
 @parse_action_for(C.FuncCall)
 @dataclass
-class Call:
+class FuncCall:
     identifier: Identifier
     arguments: List[Any]
 
@@ -90,7 +96,7 @@ class UnaryOp:
         return operator, 1, opAssoc.RIGHT, parse_action
 
 
-C.Expression = infixNotation(
+C.Operation = infixNotation(
     C.Operand,
     [
         UnaryOp.infix_notation(oneOf("+ -")),
@@ -99,3 +105,14 @@ C.Expression = infixNotation(
     ],
 )
 
+C.Assignment = C.LValue + Suppress("=") + C.Expression
+
+
+@parse_action_for(C.Assignment)
+@dataclass
+class Assignment:
+    left: Any
+    right: Any
+
+
+C.Expression = C.Assignment | C.Operation
