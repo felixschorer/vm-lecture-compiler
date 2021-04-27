@@ -1,4 +1,4 @@
-from cma.frontend.parser import C
+from frontend.cma import C
 
 test = [
     "test(3 + test(42))",

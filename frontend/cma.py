@@ -13,8 +13,8 @@ from pyparsing import (
     pyparsing_common,
 )
 
-from cma.frontend.namespace import Namespace
-from cma.frontend.parse_action_for import parse_action_for
+from frontend.namespace import Namespace
+from frontend.parse_action_for import parse_action_for
 
 ParserElement.enablePackrat()
 
