@@ -14,8 +14,8 @@ from pyparsing import (
     pyparsing_common,
 )
 
-from frontend.namespace import Namespace
-from frontend.parse_action_for import parse_action_for
+from namespace import Namespace
+from parse_action_for import parse_action_for
 
 ParserElement.enablePackrat()
 

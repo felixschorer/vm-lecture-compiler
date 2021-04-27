@@ -1,4 +1,4 @@
-from frontend.cma import C
+from cma import C
 
 test = [
     "func(x = 42)",
