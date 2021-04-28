@@ -1,12 +1,12 @@
-from typing import Dict
-
 from pyparsing import Forward, ParserElement
 
 
 class Namespace:
-    parser_elements: Dict[str, ParserElement] = dict()
+    def __init__(self):
+        # need to call __setattr__ on super to avoid infinite loop
+        super(Namespace, self).__setattr__("parser_elements", dict())
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> ParserElement:
         if name not in self.parser_elements:
             self.parser_elements[name] = Forward()
         return self.parser_elements[name]
