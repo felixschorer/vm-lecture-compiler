@@ -66,18 +66,14 @@ class BinaryOp:
     right: Any
 
     @classmethod
-    def infix_notation(cls, operator, assoc):
+    def infix_notation(cls, *operators):
         def parse_action(_s, _loc, tokens):
             tokens = ungroup(tokens)
-            if assoc == opAssoc.LEFT:
-                while len(tokens) != 1:
-                    tokens = [cls(*tokens[:3]), *tokens[3:]]
-            else:
-                while len(tokens) != 1:
-                    tokens = [*tokens[:-3], cls(*tokens[-3:])]
+            while len(tokens) != 1:
+                tokens = [cls(*tokens[:3]), *tokens[3:]]
             return tokens[0]
 
-        return operator, 2, assoc, parse_action
+        return oneOf(operators), 2, opAssoc.LEFT, parse_action
 
 
 @dataclass(frozen=True)
@@ -86,20 +82,26 @@ class UnaryOp:
     expr: Any
 
     @classmethod
-    def infix_notation(cls, operator):
+    def infix_notation(cls, *operators):
         def parse_action(_s, _loc, tokens):
             tokens = ungroup(tokens)
             return cls(*tokens)
 
-        return operator, 1, opAssoc.RIGHT, parse_action
+        return oneOf(operators), 1, opAssoc.RIGHT, parse_action
 
 
 C.Operation = infixNotation(
     C.Operand,
     [
-        UnaryOp.infix_notation(oneOf("+ -")),
-        BinaryOp.infix_notation(oneOf("* /"), opAssoc.LEFT),
-        BinaryOp.infix_notation(oneOf("+ -"), opAssoc.LEFT),
+        # https://en.cppreference.com/w/c/language/operator_precedence
+        UnaryOp.infix_notation("-", "!"),
+        BinaryOp.infix_notation("*", "/", "%"),
+        BinaryOp.infix_notation("+", "-"),
+        BinaryOp.infix_notation("<", "<=", ">", ">="),
+        BinaryOp.infix_notation("==", "!="),
+        BinaryOp.infix_notation("^"),
+        BinaryOp.infix_notation("&&"),
+        BinaryOp.infix_notation("||"),
     ],
 )
 
