@@ -124,3 +124,21 @@ class Assignment:
 
 
 C.Expression = C.Assignment | C.Operation
+
+C.PlainStatement = C.Expression + Suppress(";")
+
+
+@parse_action_for(C.PlainStatement)
+@dataclass(frozen=True)
+class PlainStatement:
+    expr: Any
+
+
+C.Statement = C.PlainStatement
+
+C.Statements = ZeroOrMore(C.Statement)
+
+
+@parse_action_for(C.Statements)
+class Statements(Container):
+    pass

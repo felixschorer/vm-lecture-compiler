@@ -11,6 +11,7 @@ from cma.frontend import (
     FuncCallArguments,
     Identifier,
     PlainStatement,
+    Statements,
     UnaryOp,
 )
 
@@ -136,3 +137,35 @@ class TestParserFuncCall(unittest.TestCase):
             )
         ]
         self.assertEqual(result, desired)
+
+
+class TestParserStatement(unittest.TestCase):
+    def test_parse_plain_statement(self):
+        data = "x = 42;"
+        result = C.Statement.parseString(data, parseAll=True).asList()
+        desired = [
+            PlainStatement(
+                expr=Assignment(left=Identifier(name="x"), right=Constant(value=42))
+            )
+        ]
+        self.assertEqual(result, desired)
+
+    def test_parse_statements(self):
+        data = "x = 42; y = 2;"
+        result = C.Statements.parseString(data, parseAll=True).asList()
+        desired = [
+            Statements(
+                PlainStatement(
+                    expr=Assignment(left=Identifier(name="x"), right=Constant(value=42))
+                ),
+                PlainStatement(
+                    expr=Assignment(left=Identifier(name="y"), right=Constant(value=2))
+                ),
+            )
+        ]
+        self.assertEqual(result, desired)
+
+    def test_parse_incorrect_statements(self):
+        data = "x = 42; y = 2"
+        with self.assertRaises(ParseException):
+            C.Statements.parseString(data, parseAll=True)
