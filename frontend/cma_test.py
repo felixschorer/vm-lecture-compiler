@@ -1,9 +1,9 @@
 import unittest
-from cma import C
+
+from frontend.cma import C
 
 
 class TestParserConstant(unittest.TestCase):
-
     def test_parsing_constant(self):
         data = "42"
         result = str(C.Expression.parseString(data))
@@ -18,7 +18,6 @@ class TestParserConstant(unittest.TestCase):
 
 
 class TestParserIdentifier(unittest.TestCase):
-
     def test_parsing_identifier(self):
         data = "asdf"
         result = str(C.Expression.parseString(data))
@@ -42,7 +41,9 @@ class TestParserBinOp(unittest.TestCase):
     def test_parsing_binop_plus_identifier(self):
         data = "a + b"
         result = str(C.Expression.parseString(data))
-        desired = "[BinaryOp(left=Identifier(name='a'), op='+', right=Identifier(name='b'))]"
+        desired = (
+            "[BinaryOp(left=Identifier(name='a'), op='+', right=Identifier(name='b'))]"
+        )
         self.assertEqual(result, desired)
 
     def test_parsing_binop_precedence(self):
@@ -61,7 +62,6 @@ class TestParserUnaryOp(unittest.TestCase):
 
 
 class TestParserAssignment(unittest.TestCase):
-    
     def test_parsing_correct_constant_assignment(self):
         data = "x = 3"
         result = str(C.Expression.parseString(data))
@@ -85,5 +85,15 @@ class TestParserAssignment(unittest.TestCase):
         result = str(C.Expression.parseString(data))
         desired = "[BinaryOp(left=Constant(value=3), op='+', right=Constant(value=3))]"
         self.assertEqual(result, desired)
-if __name__ == '__main__':
+
+
+class TestParserFuncCall(unittest.TestCase):
+    def test_parsing_correct_func_call(self):
+        data = "fib(n - 1) + fib(n - 2)"
+        result = str(C.Expression.parseString(data))
+        desired = "[BinaryOp(left=FuncCall(identifier=Identifier(name='fib'), arguments=(BinaryOp(left=Identifier(name='n'), op='-', right=Constant(value=1)),)), op='+', right=FuncCall(identifier=Identifier(name='fib'), arguments=(BinaryOp(left=Identifier(name='n'), op='-', right=Constant(value=2)),)))]"
+        self.assertEqual(result, desired)
+
+
+if __name__ == "__main__":
     unittest.main()
