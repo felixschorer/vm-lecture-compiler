@@ -9,12 +9,5 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
         environment = {"x": 4, "y": 7}
         (node,) = C.Expression.parseString(code, parseAll=True)
         result = list(code_r(node, environment))
-        desired = [
-            "loadc 7",
-            "load",
-            "loadc 1",
-            "sub",
-            "loadc 4",
-            "store",
-        ]
+        desired = ["loadc 7", "load", "loadc 1", "sub", "loadc 4", "store"]
         self.assertEqual(result, desired)
