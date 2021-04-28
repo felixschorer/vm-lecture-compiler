@@ -102,10 +102,10 @@ def render_symbolic_addresses(symbolic_code):
     # iterate over each line in the symbolic code
     for line in symbolic_code:
         if isinstance(line, SymbolicAddress):
-            # set the real address if it is a symbolic address
+            # symbolic address -> set the real address if it is a
             line.real_address = curr_real_address
         else:
-            # increment the curr_real_address and queue the line if it is an instruction
+            # instruction -> increment the curr_real_address and queue it
             unprinted_instructions.append(line)
             curr_real_address += 1
 
@@ -116,7 +116,7 @@ def render_symbolic_addresses(symbolic_code):
                 # tuple -> instruction references a symbolic address
                 instruction, address = first_instruction
                 if address.real_address is None:
-                    # unresolved address, put the line back to the front of the queue
+                    # unresolved address -> put the line back to the front of the queue
                     unprinted_instructions.appendleft(first_instruction)
                     # break out of loop inner loop to spin the outer loop until the address is resolved
                     break
