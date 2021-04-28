@@ -1,9 +1,8 @@
-from compiler.frontend.namespace import Namespace
-from compiler.frontend.parse_action_for import parse_action_for
 from dataclasses import dataclass
 from typing import Any, Tuple
 
 from pyparsing import (
+    ParserElement,
     Suppress,
     Word,
     alphas,
@@ -13,6 +12,11 @@ from pyparsing import (
     opAssoc,
     pyparsing_common,
 )
+
+from util.namespace import Namespace
+from util.parse_action_for import parse_action_for
+
+ParserElement.enablePackrat()
 
 C = Namespace()
 

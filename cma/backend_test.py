@@ -1,6 +1,6 @@
 import unittest
-from compiler.backend.cma import code_r
-from compiler.frontend.cma import C
+from cma.backend import code_r
+from cma.frontend import C
 
 
 class TestArithmeticCodeGeneration(unittest.TestCase):

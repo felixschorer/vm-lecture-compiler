@@ -1,4 +1,4 @@
-from compiler.frontend.cma import Assignment, BinaryOp, Constant, Identifier, UnaryOp
+from cma.frontend import Assignment, BinaryOp, Constant, Identifier, UnaryOp
 from typing import Any, Dict
 
 BINARY_OP_TO_INSTR = {

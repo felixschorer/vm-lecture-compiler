@@ -1,5 +1,8 @@
 import unittest
-from compiler.frontend.cma import (
+
+from pyparsing import ParseException
+
+from cma.frontend import (
     Assignment,
     BinaryOp,
     C,
@@ -8,8 +11,6 @@ from compiler.frontend.cma import (
     Identifier,
     UnaryOp,
 )
-
-from pyparsing import ParseException
 
 
 class TestParserConstant(unittest.TestCase):
