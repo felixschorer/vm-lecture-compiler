@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, List
+from typing import Any, Tuple
 
 from pyparsing import (
-    Group,
     ParserElement,
     Suppress,
     Word,
@@ -57,7 +56,7 @@ C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
 @dataclass(frozen=True)
 class FuncCall:
     identifier: Identifier
-    arguments: List[Any]
+    arguments: Tuple[Any]
 
 
 C.Operand = C.FuncCall | C.Constant | C.Identifier
