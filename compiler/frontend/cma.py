@@ -34,8 +34,6 @@ class Identifier:
     name: str
 
 
-C.LValue = C.Identifier
-
 C.FuncCallArguments = delimitedList(C.Expression)
 
 
@@ -105,7 +103,9 @@ C.Operation = infixNotation(
     ],
 )
 
-C.Assignment = C.LValue + Suppress("=") + C.Expression
+C.LeftHandSide = C.Identifier
+
+C.Assignment = C.LeftHandSide + Suppress("=") + C.Expression
 
 
 @parse_action_for(C.Assignment)
