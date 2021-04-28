@@ -42,9 +42,15 @@ class Identifier:
 C.LValue = C.Identifier
 
 
-C.FuncCall = C.Identifier + Group(
-    Suppress("(") + delimitedList(C.Expression) + Suppress(")")
-)
+C.FuncCallArguments = delimitedList(C.Expression)
+
+
+@parse_action_for(C.FuncCallArguments)
+def group_func_call_arguments(*tokens):
+    return tokens
+
+
+C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
 
 
 @parse_action_for(C.FuncCall)
