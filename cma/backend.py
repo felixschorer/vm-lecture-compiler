@@ -96,7 +96,7 @@ def code(node: Any, environment: Dict[str, int]):
 
 
 def render_symbolic_addresses(symbolic_code):
-    curr_real_address = 0  # TODO: Addresses start at 0?
+    curr_real_address = 0
     unprinted_instructions = deque()
 
     # iterate over each line in the symbolic code
