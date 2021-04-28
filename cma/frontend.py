@@ -5,6 +5,7 @@ from pyparsing import (
     ParserElement,
     Suppress,
     Word,
+    ZeroOrMore,
     alphas,
     delimitedList,
     infixNotation,
@@ -13,6 +14,7 @@ from pyparsing import (
     pyparsing_common,
 )
 
+from util.container import Container
 from util.namespace import Namespace
 from util.parse_action_for import parse_action_for
 
@@ -42,8 +44,8 @@ C.FuncCallArguments = delimitedList(C.Expression)
 
 
 @parse_action_for(C.FuncCallArguments)
-def group_func_call_arguments(*tokens):
-    return tokens
+class FuncCallArguments(Container):
+    pass
 
 
 C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
@@ -53,7 +55,7 @@ C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
 @dataclass(frozen=True)
 class FuncCall:
     identifier: Identifier
-    arguments: Tuple[Any]
+    arguments: FuncCallArguments
 
 
 C.Operand = C.FuncCall | C.Constant | C.Identifier

@@ -8,7 +8,9 @@ from cma.frontend import (
     C,
     Constant,
     FuncCall,
+    FuncCallArguments,
     Identifier,
+    PlainStatement,
     UnaryOp,
 )
 
@@ -116,7 +118,7 @@ class TestParserFuncCall(unittest.TestCase):
             BinaryOp(
                 left=FuncCall(
                     identifier=Identifier(name="fib"),
-                    arguments=(
+                    arguments=FuncCallArguments(
                         BinaryOp(
                             left=Identifier(name="n"), op="-", right=Constant(value=1)
                         ),
@@ -125,7 +127,7 @@ class TestParserFuncCall(unittest.TestCase):
                 op="+",
                 right=FuncCall(
                     identifier=Identifier(name="fib"),
-                    arguments=(
+                    arguments=FuncCallArguments(
                         BinaryOp(
                             left=Identifier(name="n"), op="-", right=Constant(value=2)
                         ),
