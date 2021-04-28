@@ -4,12 +4,21 @@ from cma.backend import code, code_r, render_symbolic_addresses
 from cma.frontend import C
 
 
+def generate_expression_code(c_code, environment):
+    (node,) = C.Expression.parseString(c_code, parseAll=True)
+    return list(render_symbolic_addresses(code_r(node, environment)))
+
+
+def generate_statement_code(c_code, environment):
+    (node,) = C.StatementSequence.parseString(c_code, parseAll=True)
+    return list(render_symbolic_addresses(code(node, environment)))
+
+
 class TestArithmeticCodeGeneration(unittest.TestCase):
     def test_simple_arithmetic_expression(self):
         data = "x = y - 1"
         environment = {"x": 4, "y": 7}
-        (node,) = C.Expression.parseString(data, parseAll=True)
-        result = list(code_r(node, environment))
+        result = generate_expression_code(data, environment)
         desired = ["loadc 7", "load", "loadc 1", "sub", "loadc 4", "store"]
         self.assertEqual(result, desired)
 
@@ -18,8 +27,7 @@ class TestStatementCodeGeneration(unittest.TestCase):
     def test_simple_statement_sequence(self):
         data = "x = 42; y = 2;"
         environment = {"x": 4, "y": 7}
-        (node,) = C.StatementSequence.parseString(data, parseAll=True)
-        result = list(code(node, environment))
+        result = generate_statement_code(data, environment)
         desired = [
             "loadc 42",
             "loadc 4",
@@ -39,8 +47,7 @@ class TestStatementCodeGeneration(unittest.TestCase):
         else y = y - x;
         """
         environment = {"x": 4, "y": 7}
-        (node,) = C.IfElse.parseString(data, parseAll=True)
-        result = list(render_symbolic_addresses(code(node, environment)))
+        result = generate_statement_code(data, environment)
         desired = [
             "loadc 4",
             "load",
