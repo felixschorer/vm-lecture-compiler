@@ -93,3 +93,35 @@ def code(node: Any, environment: Dict[str, int]):
         yield b
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
+
+
+def render_symbolic_addresses(symbolic_code):
+    curr_real_address = 0  # TODO: Addresses start at 0?
+    unprinted_instructions = deque()
+
+    # iterate over each line in the symbolic code
+    for line in symbolic_code:
+        if isinstance(line, SymbolicAddress):
+            # set the real address if it is a symbolic address
+            line.real_address = curr_real_address
+        else:
+            # increment the curr_real_address and queue the line if it is an instruction
+            unprinted_instructions.append(line)
+            curr_real_address += 1
+
+        # iterate until the queue is empty
+        while unprinted_instructions:
+            first_instruction = unprinted_instructions.popleft()
+            if isinstance(first_instruction, tuple):
+                # tuple -> instruction references a symbolic address
+                instruction, address = first_instruction
+                if address.real_address is None:
+                    # unresolved address, put the line back to the front of the queue
+                    unprinted_instructions.appendleft(first_instruction)
+                    # break out of loop inner loop to spin the outer loop until the address is resolved
+                    break
+                else:
+                    yield f"{instruction} {address.real_address}"
+            else:
+                # plain instruction
+                yield first_instruction

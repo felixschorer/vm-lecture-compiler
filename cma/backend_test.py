@@ -1,6 +1,6 @@
 import unittest
 
-from cma.backend import code, code_r
+from cma.backend import code, code_r, render_symbolic_addresses
 from cma.frontend import C
 
 
@@ -26,6 +26,42 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "store",
             "pop",
             "loadc 2",
+            "loadc 7",
+            "store",
+            "pop",
+        ]
+        self.assertEqual(result, desired)
+
+    def test_simple_if_else_statement(self):
+        data = """
+        if (x > y) 
+            x = x - y; 
+        else y = y - x;
+        """
+        environment = {"x": 4, "y": 7}
+        (node,) = C.IfElse.parseString(data, parseAll=True)
+        result = list(render_symbolic_addresses(code(node, environment)))
+        desired = [
+            "loadc 4",
+            "load",
+            "loadc 7",
+            "load",
+            "gr",
+            "jumpz 15",
+            "loadc 4",
+            "load",
+            "loadc 7",
+            "load",
+            "sub",
+            "loadc 4",
+            "store",
+            "pop",
+            "jump 23",
+            "loadc 7",
+            "load",
+            "loadc 4",
+            "load",
+            "sub",
             "loadc 7",
             "store",
             "pop",
