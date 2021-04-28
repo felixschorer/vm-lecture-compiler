@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Any
 
 from pyparsing import (
+    Optional,
     ParserElement,
     Suppress,
     Word,
@@ -19,6 +20,11 @@ from util.namespace import Namespace
 from util.parse_action_for import parse_action_for
 
 ParserElement.enablePackrat()
+
+
+def in_brackets(opening: str, parser_element: ParserElement, closing: str):
+    return Suppress(opening) + parser_element + Suppress(closing)
+
 
 C = Namespace()
 
@@ -134,7 +140,23 @@ class PlainStatement:
     expr: Any
 
 
-C.Statement = C.PlainStatement
+C.Block = in_brackets("{", C.StatementSequence, "}")
+C.BlockOrStatement = C.Statement | C.Block
+
+C.If = Suppress("if") + in_brackets("(", C.Expression, ")") + C.BlockOrStatement
+C.Else = Suppress("else") + C.BlockOrStatement
+C.IfElse = C.If + Optional(C.Else)
+
+
+@parse_action_for(C.IfElse)
+@dataclass(frozen=True)
+class IfElse:
+    expr: Any
+    then_branch: Any
+    else_branch: Any = None
+
+
+C.Statement = C.PlainStatement | C.IfElse
 
 C.StatementSequence = ZeroOrMore(C.Statement)
 

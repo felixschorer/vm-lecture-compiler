@@ -10,6 +10,7 @@ from cma.frontend import (
     FuncCall,
     FuncCallArguments,
     Identifier,
+    IfElse,
     PlainStatement,
     StatementSequence,
     UnaryOp,
@@ -155,3 +156,23 @@ class TestParserStatement(unittest.TestCase):
         data = "x = 42; y = 2"
         with self.assertRaises(ParseException):
             C.StatementSequence.parseString(data, parseAll=True)
+
+    def test_parse_if_else_if_statement(self):
+        data = "if (x < 0) x = 0; else if (1 < x) x = 1;"
+        (result,) = C.IfElse.parseString(data, parseAll=True)
+        desired = IfElse(
+            expr=BinaryOp(left=Identifier(name="x"), op="<", right=Constant(value=0)),
+            then_branch=PlainStatement(
+                expr=Assignment(left=Identifier(name="x"), right=Constant(value=0))
+            ),
+            else_branch=IfElse(
+                expr=BinaryOp(
+                    left=Constant(value=1), op="<", right=Identifier(name="x")
+                ),
+                then_branch=PlainStatement(
+                    expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
+                ),
+                else_branch=None,
+            ),
+        )
+        self.assertEqual(result, desired)
