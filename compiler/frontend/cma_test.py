@@ -1,6 +1,5 @@
 import unittest
-
-from frontend.cma import (
+from compiler.frontend.cma import (
     Assignment,
     BinaryOp,
     C,
@@ -136,7 +135,3 @@ class TestParserFuncCall(unittest.TestCase):
             )
         ]
         self.assertEqual(result, desired)
-
-
-if __name__ == "__main__":
-    unittest.main()

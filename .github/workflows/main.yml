@@ -29,5 +29,5 @@ jobs:
       - name: Install requirements 
         run: pip3 install -r requirements.txt
         
-      - name: Run Parser Tests
-        run: python3 frontend/cma_test.py
+      - name: Run Tests
+        run: python3 -m unittest discover -p *_test.py

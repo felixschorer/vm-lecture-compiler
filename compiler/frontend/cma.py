@@ -13,8 +13,8 @@ from pyparsing import (
     pyparsing_common,
 )
 
-from namespace import Namespace
-from parse_action_for import parse_action_for
+from compiler.frontend.namespace import Namespace
+from compiler.frontend.parse_action_for import parse_action_for
 
 ParserElement.enablePackrat()
 
