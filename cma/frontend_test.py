@@ -11,7 +11,7 @@ from cma.frontend import (
     FuncCallArguments,
     Identifier,
     PlainStatement,
-    Statements,
+    StatementSequence,
     UnaryOp,
 )
 
@@ -152,9 +152,9 @@ class TestParserStatement(unittest.TestCase):
 
     def test_parse_statements(self):
         data = "x = 42; y = 2;"
-        result = C.Statements.parseString(data, parseAll=True).asList()
+        result = C.StatementSequence.parseString(data, parseAll=True).asList()
         desired = [
-            Statements(
+            StatementSequence(
                 PlainStatement(
                     expr=Assignment(left=Identifier(name="x"), right=Constant(value=42))
                 ),
@@ -168,4 +168,4 @@ class TestParserStatement(unittest.TestCase):
     def test_parse_incorrect_statements(self):
         data = "x = 42; y = 2"
         with self.assertRaises(ParseException):
-            C.Statements.parseString(data, parseAll=True)
+            C.StatementSequence.parseString(data, parseAll=True)

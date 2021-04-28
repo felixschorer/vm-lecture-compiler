@@ -1,5 +1,14 @@
-from cma.frontend import Assignment, BinaryOp, Constant, Identifier, UnaryOp
 from typing import Any, Dict
+
+from cma.frontend import (
+    Assignment,
+    BinaryOp,
+    Constant,
+    Identifier,
+    PlainStatement,
+    StatementSequence,
+    UnaryOp,
+)
 
 BINARY_OP_TO_INSTR = {
     "*": "mul",
@@ -48,3 +57,14 @@ def code_r(node: Any, environment: Dict[str, int]):
         yield "store"
     else:
         raise AssertionError(f"Cannot generate code_r for {repr(node)}")
+
+
+def code(node: Any, environment: Dict[str, int]):
+    if isinstance(node, PlainStatement):
+        yield from code_r(node.expr, environment)
+        yield "pop"
+    elif isinstance(node, StatementSequence):
+        for statement in node:
+            yield from code(statement, environment)
+    else:
+        raise AssertionError(f"Cannot generate code for {repr(node)}")

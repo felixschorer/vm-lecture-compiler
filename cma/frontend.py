@@ -136,9 +136,9 @@ class PlainStatement:
 
 C.Statement = C.PlainStatement
 
-C.Statements = ZeroOrMore(C.Statement)
+C.StatementSequence = ZeroOrMore(C.Statement)
 
 
-@parse_action_for(C.Statements)
-class Statements(Container):
+@parse_action_for(C.StatementSequence)
+class StatementSequence(Container):
     pass
