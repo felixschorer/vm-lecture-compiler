@@ -25,7 +25,7 @@ C.Constant = pyparsing_common.integer
 
 
 @parse_action_for(C.Constant)
-@dataclass
+@dataclass(frozen=True)
 class Constant:
     value: int
 
@@ -34,7 +34,7 @@ C.Identifier = Word(alphas)
 
 
 @parse_action_for(C.Identifier)
-@dataclass
+@dataclass(frozen=True)
 class Identifier:
     name: str
 
@@ -54,7 +54,7 @@ C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
 
 
 @parse_action_for(C.FuncCall)
-@dataclass
+@dataclass(frozen=True)
 class FuncCall:
     identifier: Identifier
     arguments: List[Any]
@@ -67,7 +67,7 @@ def ungroup(groups):
     return [token for group in groups for token in group]
 
 
-@dataclass
+@dataclass(frozen=True)
 class BinaryOp:
     left: Any
     op: str
@@ -88,7 +88,7 @@ class BinaryOp:
         return operator, 2, assoc, parse_action
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnaryOp:
     op: str
     expr: Any
@@ -115,7 +115,7 @@ C.Assignment = C.LValue + Suppress("=") + C.Expression
 
 
 @parse_action_for(C.Assignment)
-@dataclass
+@dataclass(frozen=True)
 class Assignment:
     left: Any
     right: Any
