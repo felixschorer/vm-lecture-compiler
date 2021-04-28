@@ -1,14 +1,23 @@
-from typing import Any, Dict
+from collections import deque
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from cma.frontend import (
     Assignment,
     BinaryOp,
     Constant,
     Identifier,
+    IfElse,
     PlainStatement,
     StatementSequence,
     UnaryOp,
 )
+
+
+@dataclass
+class SymbolicAddress:
+    real_address: Optional[int] = None
+
 
 BINARY_OP_TO_INSTR = {
     "*": "mul",
@@ -66,5 +75,21 @@ def code(node: Any, environment: Dict[str, int]):
     elif isinstance(node, StatementSequence):
         for statement in node:
             yield from code(statement, environment)
+    elif isinstance(node, IfElse) and node.else_branch is None:
+        a = SymbolicAddress()
+        yield from code_r(node.expr, environment)
+        yield "jumpz", a
+        yield from code(node.then_branch, environment)
+        yield a
+    elif isinstance(node, IfElse) and node.else_branch is not None:
+        a = SymbolicAddress()
+        b = SymbolicAddress()
+        yield from code_r(node.expr, environment)
+        yield "jumpz", a
+        yield from code(node.then_branch, environment)
+        yield "jump", b
+        yield a
+        yield from code(node.else_branch, environment)
+        yield b
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
