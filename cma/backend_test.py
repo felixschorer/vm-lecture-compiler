@@ -16,18 +16,18 @@ def generate_statement_code(c_code, environment):
 
 class TestArithmeticCodeGeneration(unittest.TestCase):
     def test_simple_arithmetic_expression(self):
-        data = "x = y - 1"
+        c_code = "x = y - 1"
         environment = {"x": 4, "y": 7}
-        result = generate_expression_code(data, environment)
+        result = generate_expression_code(c_code, environment)
         desired = ["loadc 7", "load", "loadc 1", "sub", "loadc 4", "store"]
         self.assertEqual(result, desired)
 
 
 class TestStatementCodeGeneration(unittest.TestCase):
     def test_simple_statement_sequence(self):
-        data = "x = 42; y = 2;"
+        c_code = "x = 42; y = 2;"
         environment = {"x": 4, "y": 7}
-        result = generate_statement_code(data, environment)
+        result = generate_statement_code(c_code, environment)
         desired = [
             "loadc 42",
             "loadc 4",
@@ -41,13 +41,13 @@ class TestStatementCodeGeneration(unittest.TestCase):
         self.assertEqual(result, desired)
 
     def test_simple_if_else_statement(self):
-        data = """
+        c_code = """
         if (x > y) 
             x = x - y; 
         else y = y - x;
         """
         environment = {"x": 4, "y": 7}
-        result = generate_statement_code(data, environment)
+        result = generate_statement_code(c_code, environment)
         desired = [
             "loadc 4",
             "load",
