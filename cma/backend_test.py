@@ -74,3 +74,32 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "pop",
         ]
         self.assertEqual(result, desired)
+
+    def test_simple_while_statement(self):
+        c_code = "while (a > 0) { c = c + 1; a = a - b; }"
+        environment = {"a": 7, "b": 8, "c": 9}
+        result = generate_statement_code(c_code, environment)
+        desired = [
+            "loadc 7",
+            "load",
+            "loadc 0",
+            "gr",
+            "jumpz 21",
+            "loadc 9",
+            "load",
+            "loadc 1",
+            "add",
+            "loadc 9",
+            "store",
+            "pop",
+            "loadc 7",
+            "load",
+            "loadc 8",
+            "load",
+            "sub",
+            "loadc 7",
+            "store",
+            "pop",
+            "jump 0",
+        ]
+        self.assertEqual(result, desired)

@@ -11,6 +11,7 @@ from cma.frontend import (
     PlainStatement,
     StatementSequence,
     UnaryOp,
+    While,
 )
 
 
@@ -89,6 +90,15 @@ def code(node: Any, environment: Dict[str, int]):
         yield "jump", b
         yield a
         yield from code(node.else_branch, environment)
+        yield b
+    elif isinstance(node, While):
+        a = SymbolicAddress()
+        b = SymbolicAddress()
+        yield a
+        yield from code_r(node.expr, environment)
+        yield "jumpz", b
+        yield from code(node.body, environment)
+        yield "jump", a
         yield b
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
