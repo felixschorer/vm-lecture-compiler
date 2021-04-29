@@ -1,6 +1,6 @@
 from collections import deque
-from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
+from weakref import WeakKeyDictionary
 
 from cma.frontend import (
     Assignment,
@@ -14,9 +14,8 @@ from cma.frontend import (
 )
 
 
-@dataclass
 class SymbolicAddress:
-    real_address: Optional[int] = None
+    pass
 
 
 BINARY_OP_TO_INSTR = {
@@ -97,31 +96,32 @@ def code(node: Any, environment: Dict[str, int]):
 
 def render_symbolic_addresses(symbolic_code):
     curr_real_address = 0
-    unprinted_instructions = deque()
+    real_address_table = WeakKeyDictionary()
+    unprocessed_instructions = deque()
 
-    # iterate over each line in the symbolic code
     for line in symbolic_code:
         if isinstance(line, SymbolicAddress):
-            # symbolic address -> set the real address if it is a
-            line.real_address = curr_real_address
+            # symbolic address -> set the real address of that address
+            real_address_table[line] = curr_real_address
         else:
-            # instruction -> increment the curr_real_address and queue it
-            unprinted_instructions.append(line)
+            # instruction -> queue it and increment the curr_real_address
+            unprocessed_instructions.append(line)
             curr_real_address += 1
 
-        # iterate until the queue is empty
-        while unprinted_instructions:
-            first_instruction = unprinted_instructions.popleft()
-            if isinstance(first_instruction, tuple):
+        # iterates until the queue is empty or until we hit a unresolved address
+        # effectively a noop when we're waiting for a symbolic address to be resolved
+        while unprocessed_instructions:
+            instruction = unprocessed_instructions.popleft()
+            if isinstance(instruction, tuple):
                 # tuple -> instruction references a symbolic address
-                instruction, address = first_instruction
-                if address.real_address is None:
+                opcode, address = instruction
+                if address not in real_address_table:
                     # unresolved address -> put the line back to the front of the queue
-                    unprinted_instructions.appendleft(first_instruction)
-                    # break out of loop inner loop to spin the outer loop until the address is resolved
+                    unprocessed_instructions.appendleft(instruction)
+                    # break out of the inner loop to spin the outer loop until the address is resolved
                     break
                 else:
-                    yield f"{instruction} {address.real_address}"
+                    yield f"{opcode} {real_address_table[address]}"
             else:
                 # plain instruction
-                yield first_instruction
+                yield instruction
