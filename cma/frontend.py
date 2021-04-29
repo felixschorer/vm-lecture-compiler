@@ -156,7 +156,17 @@ class IfElse:
     else_branch: Any = None
 
 
-C.Statement = C.PlainStatement | C.IfElse
+C.While = Suppress("while") + in_brackets("(", C.Expression, ")") + C.BlockOrStatement
+
+
+@parse_action_for(C.While)
+@dataclass(frozen=True)
+class While:
+    expr: Any
+    body: Any
+
+
+C.Statement = C.PlainStatement | C.IfElse | C.While
 
 C.StatementSequence = ZeroOrMore(C.Statement)
 

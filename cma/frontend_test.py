@@ -14,6 +14,7 @@ from cma.frontend import (
     PlainStatement,
     StatementSequence,
     UnaryOp,
+    While,
 )
 
 
@@ -173,6 +174,34 @@ class TestParserStatement(unittest.TestCase):
                     expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
                 ),
                 else_branch=None,
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_parse_while_statement(self):
+        data = "while (a > 0) { c = c + 1; a = a - b; }"
+        (result,) = C.While.parseString(data, parseAll=True)
+        desired = While(
+            expr=BinaryOp(left=Identifier(name="a"), op=">", right=Constant(value=0)),
+            body=StatementSequence(
+                PlainStatement(
+                    expr=Assignment(
+                        left=Identifier(name="c"),
+                        right=BinaryOp(
+                            left=Identifier(name="c"), op="+", right=Constant(value=1)
+                        ),
+                    )
+                ),
+                PlainStatement(
+                    expr=Assignment(
+                        left=Identifier(name="a"),
+                        right=BinaryOp(
+                            left=Identifier(name="a"),
+                            op="-",
+                            right=Identifier(name="b"),
+                        ),
+                    )
+                ),
             ),
         )
         self.assertEqual(result, desired)
