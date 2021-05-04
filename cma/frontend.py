@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from pyparsing import (
+    Keyword,
     Optional,
     ParserElement,
     Suppress,
@@ -28,6 +29,16 @@ def in_brackets(opening: str, parser_element: ParserElement, closing: str):
 
 C = Namespace()
 
+
+C.FOR = Keyword("for")
+C.WHILE = Keyword("while")
+C.SWITCH = Keyword("switch")
+C.CASE = Keyword("case")
+C.BREAK = Keyword("break")
+C.DEFAULT = Keyword("default")
+
+C.Keyword = C.FOR | C.WHILE | C.SWITCH | C.CASE | C.BREAK | C.DEFAULT
+
 C.Constant = pyparsing_common.integer
 
 
@@ -37,7 +48,7 @@ class Constant:
     value: int
 
 
-C.Identifier = Word(alphas)
+C.Identifier = ~C.Keyword + Word(alphas)
 
 
 @parse_action_for(C.Identifier)
@@ -181,7 +192,46 @@ class For:
     body: Any
 
 
-C.Statement = C.PlainStatement | C.IfElse | C.While | C.For
+C.Case = (
+    Suppress("case")
+    + C.Constant
+    + Suppress(":")
+    + C.StatementSequence
+    + Suppress("break;")
+)
+
+
+@parse_action_for(C.Case)
+@dataclass(frozen=True)
+class Case:
+    value: Any
+    body: Any
+
+
+C.Cases = ZeroOrMore(C.Case)
+
+
+@parse_action_for(C.Cases)
+class Cases(Container):
+    pass
+
+
+C.Switch = (
+    Suppress("switch")
+    + in_brackets("(", C.Expression, ")")
+    + in_brackets("{", C.Cases + Suppress("default:") + C.StatementSequence, "}")
+)
+
+
+@parse_action_for(C.Switch)
+@dataclass(frozen=True)
+class Switch:
+    expr: Any
+    cases: Any
+    default_case: Any
+
+
+C.Statement = C.PlainStatement | C.IfElse | C.While | C.For | C.Switch
 
 C.StatementSequence = ZeroOrMore(C.Statement)
 

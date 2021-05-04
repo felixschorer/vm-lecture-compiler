@@ -6,6 +6,8 @@ from cma.frontend import (
     Assignment,
     BinaryOp,
     C,
+    Case,
+    Cases,
     Constant,
     For,
     FuncCall,
@@ -14,6 +16,7 @@ from cma.frontend import (
     IfElse,
     PlainStatement,
     StatementSequence,
+    Switch,
     UnaryOp,
     While,
 )
@@ -225,6 +228,48 @@ class TestParserStatement(unittest.TestCase):
                     right=BinaryOp(
                         left=Identifier(name="x"), op="*", right=Identifier(name="i")
                     ),
+                )
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_parse_switch_statement(self):
+        data = """
+        switch (x) {
+            case 0:
+                x = 1;
+                y = x;
+                break;
+            case 1:
+                break;
+            default:
+                x = 1;
+        }
+        """
+        (result,) = C.Statement.parseString(data, parseAll=True)
+        desired = Switch(
+            expr=Identifier(name="x"),
+            cases=Cases(
+                Case(
+                    value=Constant(value=0),
+                    body=StatementSequence(
+                        PlainStatement(
+                            expr=Assignment(
+                                left=Identifier(name="x"), right=Constant(value=1)
+                            )
+                        ),
+                        PlainStatement(
+                            expr=Assignment(
+                                left=Identifier(name="y"), right=Identifier(name="x")
+                            )
+                        ),
+                    ),
+                ),
+                Case(value=Constant(value=1), body=StatementSequence()),
+            ),
+            default_case=StatementSequence(
+                PlainStatement(
+                    expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
                 )
             ),
         )
