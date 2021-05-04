@@ -6,12 +6,14 @@ from cma.frontend import (
     Assignment,
     BinaryOp,
     Constant,
+    For,
     Identifier,
     IfElse,
     PlainStatement,
     StatementSequence,
+    Switch,
     UnaryOp,
-    While, For,
+    While,
 )
 
 
@@ -68,6 +70,23 @@ def code_r(node: Any, environment: Dict[str, int]):
         raise AssertionError(f"Cannot generate code_r for {repr(node)}")
 
 
+def check(start: int, end: int, b: SymbolicAddress):
+    a = SymbolicAddress()
+    yield "dup"
+    yield f"loadc {start}"
+    yield "geq"
+    yield "jumpz", a
+    yield "dup"
+    yield f"loadc {end}"
+    yield "le"
+    yield "jumpz", a
+    yield "jumpi", b
+    yield a
+    yield "pop"
+    yield f"loadc {end}"
+    yield "jumpi", b
+
+
 def code(node: Any, environment: Dict[str, int]):
     if isinstance(node, PlainStatement):
         yield from code_r(node.expr, environment)
@@ -113,6 +132,35 @@ def code(node: Any, environment: Dict[str, int]):
         yield "pop"
         yield "jump", a
         yield b
+    elif isinstance(node, Switch):
+        b = SymbolicAddress()
+        cs = []
+        d = SymbolicAddress()
+        k = len(node.cases)
+        yield from code_r(node.expr, environment)
+        yield from check(0, k, b)
+
+        # cases
+        for case in node.cases:
+            c = SymbolicAddress()
+            cs.append(c)
+            yield c
+            yield from code(case.body, environment)
+            yield "jump", d
+
+        # default case
+        c = SymbolicAddress()
+        cs.append(c)
+        yield c
+        yield from code(node.default_case, environment)
+        yield "jump", d
+
+        # jump table
+        yield b
+        for c in cs:
+            yield "jump", c
+
+        yield d
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
 

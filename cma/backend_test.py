@@ -136,3 +136,45 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "jump 4",
         ]
         self.assertEqual(result, desired)
+
+    def test_simple_switch(self):
+        c_code = """
+        switch (x) {
+            case 0:
+                x = 0;
+                break;
+            default:
+                x = 1;
+        }
+        """
+        environment = {"x": 42}
+        result = generate_statement_code(c_code, environment)
+        desired = [
+            "loadc 42",
+            "load",
+            "dup",
+            "loadc 0",
+            "geq",
+            "jumpz 11",
+            "dup",
+            "loadc 1",
+            "le",
+            "jumpz 11",
+            "jumpi 24",
+            "pop",
+            "loadc 1",
+            "jumpi 24",
+            "loadc 0",
+            "loadc 42",
+            "store",
+            "pop",
+            "jump 26",
+            "loadc 1",
+            "loadc 42",
+            "store",
+            "pop",
+            "jump 26",
+            "jump 14",
+            "jump 19",
+        ]
+        self.assertEqual(result, desired)
