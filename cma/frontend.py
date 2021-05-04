@@ -166,7 +166,22 @@ class While:
     body: Any
 
 
-C.Statement = C.PlainStatement | C.IfElse | C.While
+C.ForExpressions = (
+    C.Expression + Suppress(";") + C.Expression + Suppress(";") + C.Expression
+)
+C.For = Suppress("for") + in_brackets("(", C.ForExpressions, ")") + C.BlockOrStatement
+
+
+@parse_action_for(C.For)
+@dataclass(frozen=True)
+class For:
+    expr1: Any
+    expr2: Any
+    expr3: Any
+    body: Any
+
+
+C.Statement = C.PlainStatement | C.IfElse | C.While | C.For
 
 C.StatementSequence = ZeroOrMore(C.Statement)
 

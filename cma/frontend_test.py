@@ -7,6 +7,7 @@ from cma.frontend import (
     BinaryOp,
     C,
     Constant,
+    For,
     FuncCall,
     FuncCallArguments,
     Identifier,
@@ -160,7 +161,7 @@ class TestParserStatement(unittest.TestCase):
 
     def test_parse_if_else_if_statement(self):
         data = "if (x < 0) x = 0; else if (1 < x) x = 1;"
-        (result,) = C.IfElse.parseString(data, parseAll=True)
+        (result,) = C.Statement.parseString(data, parseAll=True)
         desired = IfElse(
             expr=BinaryOp(left=Identifier(name="x"), op="<", right=Constant(value=0)),
             then_branch=PlainStatement(
@@ -180,7 +181,7 @@ class TestParserStatement(unittest.TestCase):
 
     def test_parse_while_statement(self):
         data = "while (a > 0) { c = c + 1; a = a - b; }"
-        (result,) = C.While.parseString(data, parseAll=True)
+        (result,) = C.Statement.parseString(data, parseAll=True)
         desired = While(
             expr=BinaryOp(left=Identifier(name="a"), op=">", right=Constant(value=0)),
             body=StatementSequence(
@@ -202,6 +203,29 @@ class TestParserStatement(unittest.TestCase):
                         ),
                     )
                 ),
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_parse_for_statement(self):
+        data = "for (i = 0; i < 10; i = i + 1) x = x * i;"
+        (result,) = C.Statement.parseString(data, parseAll=True)
+        desired = For(
+            expr1=Assignment(left=Identifier(name="i"), right=Constant(value=0)),
+            expr2=BinaryOp(left=Identifier(name="i"), op="<", right=Constant(value=10)),
+            expr3=Assignment(
+                left=Identifier(name="i"),
+                right=BinaryOp(
+                    left=Identifier(name="i"), op="+", right=Constant(value=1)
+                ),
+            ),
+            body=PlainStatement(
+                expr=Assignment(
+                    left=Identifier(name="x"),
+                    right=BinaryOp(
+                        left=Identifier(name="x"), op="*", right=Identifier(name="i")
+                    ),
+                )
             ),
         )
         self.assertEqual(result, desired)

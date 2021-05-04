@@ -103,3 +103,36 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "jump 0",
         ]
         self.assertEqual(result, desired)
+
+    def test_simple_for(self):
+        c_code = "for (i = 0; i < 10; i = i + 1) x = x * i;"
+        environment = {"i": 1, "x": 42}
+        result = generate_statement_code(c_code, environment)
+        desired = [
+            "loadc 0",
+            "loadc 1",
+            "store",
+            "pop",
+            "loadc 1",
+            "load",
+            "loadc 10",
+            "le",
+            "jumpz 25",
+            "loadc 42",
+            "load",
+            "loadc 1",
+            "load",
+            "mul",
+            "loadc 42",
+            "store",
+            "pop",
+            "loadc 1",
+            "load",
+            "loadc 1",
+            "add",
+            "loadc 1",
+            "store",
+            "pop",
+            "jump 4",
+        ]
+        self.assertEqual(result, desired)

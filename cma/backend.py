@@ -11,7 +11,7 @@ from cma.frontend import (
     PlainStatement,
     StatementSequence,
     UnaryOp,
-    While,
+    While, For,
 )
 
 
@@ -98,6 +98,19 @@ def code(node: Any, environment: Dict[str, int]):
         yield from code_r(node.expr, environment)
         yield "jumpz", b
         yield from code(node.body, environment)
+        yield "jump", a
+        yield b
+    elif isinstance(node, For):
+        a = SymbolicAddress()
+        b = SymbolicAddress()
+        yield from code_r(node.expr1, environment)
+        yield "pop"
+        yield a
+        yield from code_r(node.expr2, environment)
+        yield "jumpz", b
+        yield from code(node.body, environment)
+        yield from code_r(node.expr3, environment)
+        yield "pop"
         yield "jump", a
         yield b
     else:
