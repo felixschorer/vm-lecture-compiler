@@ -1,6 +1,6 @@
 import unittest
 
-from cma.backend import code, code_r, render_symbolic_addresses, EnvEntry, Basic
+from cma.backend import code, code_r, render_symbolic_addresses, EnvEntry, Basic, Struct, Array, sizeof
 from cma.frontend import C
 
 
@@ -13,8 +13,10 @@ def generate_statement_code(c_code, environment):
     (node,) = C.StatementSequence.parseString(c_code, parseAll=True)
     return list(render_symbolic_addresses(code(node, environment)))
 
-def basic_addr(addr:int):
+
+def basic_addr(addr: int):
     return EnvEntry(addr, Basic())
+
 
 class TestArithmeticCodeGeneration(unittest.TestCase):
     def test_simple_arithmetic_expression(self):
@@ -25,6 +27,20 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
         desired = ["loadc 7", "load", "loadc 1", "sub", "loadc 4", "store"]
         self.assertEqual(result, desired)
 
+
+class TestSizeof(unittest.TestCase):
+
+    def test_array_of_stucts(self):
+        data = Array(Struct({"a": Basic(), "b": Basic()}), 5)
+        desired = 10
+        result = sizeof(data)
+        self.assertEqual(result, desired)
+
+    def test_struct_containing_array(self):
+        data = Struct({"a": Array(Basic(), 3), "b": Basic()})
+        desired = 4
+        result = sizeof(data)
+        self.assertEqual(result, desired)
 
 class TestStatementCodeGeneration(unittest.TestCase):
     def test_simple_statement_sequence(self):
@@ -80,7 +96,8 @@ class TestStatementCodeGeneration(unittest.TestCase):
 
     def test_simple_while_statement(self):
         c_code = "while (a > 0) { c = c + 1; a = a - b; }"
-        environment = {"a": basic_addr(7), "b": basic_addr(8), "c": basic_addr(9)}
+        environment = {"a": basic_addr(
+            7), "b": basic_addr(8), "c": basic_addr(9)}
         result = generate_statement_code(c_code, environment)
         desired = [
             "loadc 7",

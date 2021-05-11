@@ -191,6 +191,13 @@ def code(node: Any, environment: Dict[str, EnvEntry]):
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
 
+def sizeof(t: Datatype):
+    if isinstance(t, Basic):
+        return 1
+    elif isinstance(t, Array):
+        return sizeof(t.datatype) * t.length
+    elif isinstance(t, Struct):
+        return sum(sizeof(entry) for entry in t.entries.values())
 
 def render_symbolic_addresses(symbolic_code):
     curr_real_address = 0
