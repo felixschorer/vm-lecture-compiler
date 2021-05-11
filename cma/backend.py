@@ -1,6 +1,7 @@
 from collections import deque
-from typing import Any, Dict
+from typing import Any, Dict, Union
 from weakref import WeakKeyDictionary
+from dataclasses import dataclass
 
 from cma.frontend import (
     Assignment,
@@ -19,6 +20,32 @@ from cma.frontend import (
 
 class SymbolicAddress:
     pass
+
+
+Datatype = Union["Array", "Basic", "Struct"]
+
+
+@dataclass(frozen=True)
+class EnvEntry:
+    address: int
+    datatype: Datatype
+    local: bool = False
+
+
+@dataclass(frozen=True)
+class Array:
+    datatype: Datatype
+    length: int
+
+
+@dataclass(frozen=True)
+class Basic:
+    pass
+
+
+@dataclass(frozen=True)
+class Struct:
+    entries: Dict[str, Datatype]
 
 
 BINARY_OP_TO_INSTR = {
@@ -42,14 +69,14 @@ BINARY_OP_TO_INSTR = {
 UNARY_OP_TO_INSTR = {"-": "neg", "!": "not"}
 
 
-def code_l(node: Any, environment: Dict[str, int]):
+def code_l(node: Any, environment: Dict[str, EnvEntry]):
     if isinstance(node, Identifier):
-        yield f"loadc {environment[node.name]}"
+        yield f"loadc {environment[node.name].address}"
     else:
         raise AssertionError(f"Cannot generate code_l for {repr(node)}")
 
 
-def code_r(node: Any, environment: Dict[str, int]):
+def code_r(node: Any, environment: Dict[str, EnvEntry]):
     if isinstance(node, BinaryOp):
         yield from code_r(node.left, environment)
         yield from code_r(node.right, environment)
@@ -87,7 +114,7 @@ def check(start: int, end: int, b: SymbolicAddress):
     yield "jumpi", b
 
 
-def code(node: Any, environment: Dict[str, int]):
+def code(node: Any, environment: Dict[str, EnvEntry]):
     if isinstance(node, PlainStatement):
         yield from code_r(node.expr, environment)
         yield "pop"
