@@ -1,6 +1,15 @@
 import unittest
 
-from cma.backend import code, code_r, render_symbolic_addresses, EnvEntry, Basic, Struct, Array, sizeof
+from cma.backend import (
+    code,
+    code_r,
+    render_symbolic_addresses,
+    EnvEntry,
+    Basic,
+    Struct,
+    Array,
+    sizeof,
+)
 from cma.frontend import C
 
 
@@ -29,7 +38,6 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
 
 
 class TestSizeof(unittest.TestCase):
-
     def test_array_of_stucts(self):
         data = Array(Struct({"a": Basic(), "b": Basic()}), 5)
         desired = 10
@@ -41,6 +49,7 @@ class TestSizeof(unittest.TestCase):
         desired = 4
         result = sizeof(data)
         self.assertEqual(result, desired)
+
 
 class TestStatementCodeGeneration(unittest.TestCase):
     def test_simple_statement_sequence(self):
@@ -96,8 +105,7 @@ class TestStatementCodeGeneration(unittest.TestCase):
 
     def test_simple_while_statement(self):
         c_code = "while (a > 0) { c = c + 1; a = a - b; }"
-        environment = {"a": basic_addr(
-            7), "b": basic_addr(8), "c": basic_addr(9)}
+        environment = {"a": basic_addr(7), "b": basic_addr(8), "c": basic_addr(9)}
         result = generate_statement_code(c_code, environment)
         desired = [
             "loadc 7",
