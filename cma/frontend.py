@@ -75,7 +75,7 @@ class FuncCall:
     arguments: FuncCallArguments
 
 
-C.Operand = C.FuncCall | C.Constant | C.Identifier
+C.Operand = C.FuncCall | C.Constant | C.ArrayAccess | C.Identifier
 
 
 def ungroup(groups):
@@ -128,7 +128,17 @@ C.Operation = infixNotation(
     ],
 )
 
-C.LeftHandSide = C.Identifier
+C.ArrayAccess = C.Identifier + in_brackets('[', C.Expression, ']')
+
+
+@parse_action_for(C.ArrayAccess)
+@dataclass(frozen=True)
+class ArrayAccess:
+    identifier: Identifier
+    expr: Any
+
+
+C.LeftHandSide =  C.ArrayAccess | C.Identifier
 
 C.Assignment = C.LeftHandSide + Suppress("=") + C.Expression
 
@@ -154,7 +164,8 @@ class PlainStatement:
 C.Block = in_brackets("{", C.StatementSequence, "}")
 C.BlockOrStatement = C.Statement | C.Block
 
-C.If = Suppress("if") + in_brackets("(", C.Expression, ")") + C.BlockOrStatement
+C.If = Suppress("if") + in_brackets("(", C.Expression, ")") + \
+    C.BlockOrStatement
 C.Else = Suppress("else") + C.BlockOrStatement
 C.IfElse = C.If + Optional(C.Else)
 
@@ -167,7 +178,8 @@ class IfElse:
     else_branch: Any = None
 
 
-C.While = Suppress("while") + in_brackets("(", C.Expression, ")") + C.BlockOrStatement
+C.While = Suppress("while") + \
+    in_brackets("(", C.Expression, ")") + C.BlockOrStatement
 
 
 @parse_action_for(C.While)
@@ -180,7 +192,8 @@ class While:
 C.ForExpressions = (
     C.Expression + Suppress(";") + C.Expression + Suppress(";") + C.Expression
 )
-C.For = Suppress("for") + in_brackets("(", C.ForExpressions, ")") + C.BlockOrStatement
+C.For = Suppress("for") + \
+    in_brackets("(", C.ForExpressions, ")") + C.BlockOrStatement
 
 
 @parse_action_for(C.For)
@@ -219,7 +232,8 @@ class Cases(Container):
 C.Switch = (
     Suppress("switch")
     + in_brackets("(", C.Expression, ")")
-    + in_brackets("{", C.Cases + Suppress("default:") + C.StatementSequence, "}")
+    + in_brackets("{", C.Cases + Suppress("default:") +
+                  C.StatementSequence, "}")
 )
 
 

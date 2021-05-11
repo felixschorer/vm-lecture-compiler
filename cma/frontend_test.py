@@ -19,6 +19,7 @@ from cma.frontend import (
     Switch,
     UnaryOp,
     While,
+    ArrayAccess
 )
 
 
@@ -52,7 +53,8 @@ class TestParserBinOp(unittest.TestCase):
     def test_parsing_binop_minus_constants(self):
         data = "42 - 1"
         (result,) = C.Expression.parseString(data, parseAll=True)
-        desired = BinaryOp(left=Constant(value=42), op="-", right=Constant(value=1))
+        desired = BinaryOp(left=Constant(value=42),
+                           op="-", right=Constant(value=1))
         self.assertEqual(result, desired)
 
     def test_parsing_binop_plus_identifier(self):
@@ -69,7 +71,8 @@ class TestParserBinOp(unittest.TestCase):
         desired = BinaryOp(
             left=Constant(value=3),
             op="+",
-            right=BinaryOp(left=Identifier(name="d"), op="/", right=Constant(value=5)),
+            right=BinaryOp(left=Identifier(name="d"),
+                           op="/", right=Constant(value=5)),
         )
         self.assertEqual(result, desired)
 
@@ -86,7 +89,8 @@ class TestParserAssignment(unittest.TestCase):
     def test_parsing_correct_constant_assignment(self):
         data = "x = 3"
         (result,) = C.Expression.parseString(data, parseAll=True)
-        desired = Assignment(left=Identifier(name="x"), right=Constant(value=3))
+        desired = Assignment(left=Identifier(
+            name="x"), right=Constant(value=3))
         self.assertEqual(result, desired)
 
     def test_parsing_incorrect_constant_assignment(self):
@@ -99,7 +103,8 @@ class TestParserAssignment(unittest.TestCase):
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = Assignment(
             left=Identifier(name="x"),
-            right=BinaryOp(left=Constant(value=3), op="+", right=Identifier(name="y")),
+            right=BinaryOp(left=Constant(value=3), op="+",
+                           right=Identifier(name="y")),
         )
         self.assertEqual(result, desired)
 
@@ -135,12 +140,29 @@ class TestParserFuncCall(unittest.TestCase):
         self.assertEqual(result, desired)
 
 
+class TestArrayAccess(unittest.TestCase):
+    def test_simple_array_assignment(self):
+        data = "a[2] = 42"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(left=ArrayAccess(identifier=Identifier(
+            name='a'), expr=Constant(value=2)), right=Constant(value=42))
+        self.assertEqual(result, desired)
+
+    def test_simple_array_access(self):
+        data = "b = a[1]"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(left=Identifier(name='b'), right=ArrayAccess(
+            identifier=Identifier(name='a'), expr=Constant(value=1)))
+        self.assertEqual(result, desired)
+
+
 class TestParserStatement(unittest.TestCase):
     def test_parse_plain_statement(self):
         data = "x = 42;"
         (result,) = C.Statement.parseString(data, parseAll=True)
         desired = PlainStatement(
-            expr=Assignment(left=Identifier(name="x"), right=Constant(value=42))
+            expr=Assignment(left=Identifier(name="x"),
+                            right=Constant(value=42))
         )
         self.assertEqual(result, desired)
 
@@ -149,10 +171,12 @@ class TestParserStatement(unittest.TestCase):
         (result,) = C.StatementSequence.parseString(data, parseAll=True)
         desired = StatementSequence(
             PlainStatement(
-                expr=Assignment(left=Identifier(name="x"), right=Constant(value=42))
+                expr=Assignment(left=Identifier(name="x"),
+                                right=Constant(value=42))
             ),
             PlainStatement(
-                expr=Assignment(left=Identifier(name="y"), right=Constant(value=2))
+                expr=Assignment(left=Identifier(name="y"),
+                                right=Constant(value=2))
             ),
         )
         self.assertEqual(result, desired)
@@ -166,16 +190,19 @@ class TestParserStatement(unittest.TestCase):
         data = "if (x < 0) x = 0; else if (1 < x) x = 1;"
         (result,) = C.Statement.parseString(data, parseAll=True)
         desired = IfElse(
-            expr=BinaryOp(left=Identifier(name="x"), op="<", right=Constant(value=0)),
+            expr=BinaryOp(left=Identifier(name="x"),
+                          op="<", right=Constant(value=0)),
             then_branch=PlainStatement(
-                expr=Assignment(left=Identifier(name="x"), right=Constant(value=0))
+                expr=Assignment(left=Identifier(name="x"),
+                                right=Constant(value=0))
             ),
             else_branch=IfElse(
                 expr=BinaryOp(
                     left=Constant(value=1), op="<", right=Identifier(name="x")
                 ),
                 then_branch=PlainStatement(
-                    expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
+                    expr=Assignment(left=Identifier(name="x"),
+                                    right=Constant(value=1))
                 ),
                 else_branch=None,
             ),
@@ -186,7 +213,8 @@ class TestParserStatement(unittest.TestCase):
         data = "while (a > 0) { c = c + 1; a = a - b; }"
         (result,) = C.Statement.parseString(data, parseAll=True)
         desired = While(
-            expr=BinaryOp(left=Identifier(name="a"), op=">", right=Constant(value=0)),
+            expr=BinaryOp(left=Identifier(name="a"),
+                          op=">", right=Constant(value=0)),
             body=StatementSequence(
                 PlainStatement(
                     expr=Assignment(
@@ -214,8 +242,10 @@ class TestParserStatement(unittest.TestCase):
         data = "for (i = 0; i < 10; i = i + 1) x = x * i;"
         (result,) = C.Statement.parseString(data, parseAll=True)
         desired = For(
-            expr1=Assignment(left=Identifier(name="i"), right=Constant(value=0)),
-            expr2=BinaryOp(left=Identifier(name="i"), op="<", right=Constant(value=10)),
+            expr1=Assignment(left=Identifier(name="i"),
+                             right=Constant(value=0)),
+            expr2=BinaryOp(left=Identifier(name="i"),
+                           op="<", right=Constant(value=10)),
             expr3=Assignment(
                 left=Identifier(name="i"),
                 right=BinaryOp(
@@ -269,7 +299,8 @@ class TestParserStatement(unittest.TestCase):
             ),
             default_case=StatementSequence(
                 PlainStatement(
-                    expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
+                    expr=Assignment(left=Identifier(name="x"),
+                                    right=Constant(value=1))
                 )
             ),
         )
