@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, List, Tuple
 from weakref import WeakKeyDictionary
 from dataclasses import dataclass
 
@@ -45,7 +45,7 @@ class Basic:
 
 @dataclass(frozen=True)
 class Struct:
-    entries: Dict[str, Datatype]
+    entries: List[Tuple[str, Datatype]]
 
 
 BINARY_OP_TO_INSTR = {
@@ -198,7 +198,7 @@ def sizeof(t: Datatype):
     elif isinstance(t, Array):
         return sizeof(t.datatype) * t.length
     elif isinstance(t, Struct):
-        return sum(sizeof(entry) for entry in t.entries.values())
+        return sum(sizeof(entry) for _, entry in t.entries)
 
 
 def render_symbolic_addresses(symbolic_code):
