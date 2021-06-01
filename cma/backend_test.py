@@ -45,7 +45,7 @@ class TestSizeof(unittest.TestCase):
         self.assertEqual(result, desired)
 
     def test_struct_containing_array(self):
-        data = Struct([("a", Array(Basic(), 3)),("b", Basic())])
+        data = Struct([("a", Array(Basic(), 3)), ("b", Basic())])
         desired = 4
         result = sizeof(data)
         self.assertEqual(result, desired)
@@ -204,5 +204,23 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "jump 26",
             "jump 14",
             "jump 19",
+        ]
+        self.assertEqual(result, desired)
+
+    def test_simple_array_assignment(self):
+        c_code = """
+        a[5] = 7;
+        """
+        environment = {"a": basic_addr(42)}
+        result = generate_statement_code(c_code, environment)
+        desired = [
+            "loadc 7",
+            "loadc 42",
+            "loadc 5",
+            "loadc 1",
+            "mul",
+            "add",
+            "store",
+            "pop",
         ]
         self.assertEqual(result, desired)

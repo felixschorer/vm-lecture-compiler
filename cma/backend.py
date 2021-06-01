@@ -15,6 +15,7 @@ from cma.frontend import (
     Switch,
     UnaryOp,
     While,
+    ArrayAccess,
 )
 
 
@@ -72,6 +73,13 @@ UNARY_OP_TO_INSTR = {"-": "neg", "!": "not"}
 def code_l(node: Any, environment: Dict[str, EnvEntry]):
     if isinstance(node, Identifier):
         yield f"loadc {environment[node.name].address}"
+    elif isinstance(node, ArrayAccess):
+        yield f"loadc {environment[node.identifier.name].address}"
+        yield from code_r(node.expr, environment)
+        yield f"loadc {sizeof(environment[node.identifier.name].datatype)}"
+        yield "mul"
+        yield "add"
+
     else:
         raise AssertionError(f"Cannot generate code_l for {repr(node)}")
 
@@ -93,6 +101,9 @@ def code_r(node: Any, environment: Dict[str, EnvEntry]):
         yield from code_r(node.right, environment)
         yield from code_l(node.left, environment)
         yield "store"
+    elif isinstance(node, ArrayAccess):
+        yield from code_l(node, environment)
+        yield "load"                                # This was added by us to be able to access array elements. Our parser is not type aware, henve we need this litle hack
     else:
         raise AssertionError(f"Cannot generate code_r for {repr(node)}")
 
