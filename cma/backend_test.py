@@ -1,13 +1,13 @@
 import unittest
 
 from cma.backend import (
+    Array,
+    Basic,
+    EnvEntry,
+    Struct,
     code,
     code_r,
     render_symbolic_addresses,
-    EnvEntry,
-    Basic,
-    Struct,
-    Array,
     sizeof,
 )
 from cma.frontend import C
