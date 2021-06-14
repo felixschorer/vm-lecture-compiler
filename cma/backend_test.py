@@ -8,10 +8,19 @@ from cma.backend import (
     Struct,
     code,
     code_r,
+    datatype,
     render_symbolic_addresses,
     sizeof,
 )
-from cma.frontend import C
+from cma.frontend import (
+    ArrayAccess,
+    C,
+    Constant,
+    Identifier,
+    PointerDereference,
+    StructAccess,
+    StructPointerAccess,
+)
 
 
 def generate_expression_code(c_code, environment):
@@ -48,6 +57,54 @@ class TestSizeof(unittest.TestCase):
         data = Struct([("a", Array(Basic(), 3)), ("b", Pointer(Basic()))])
         desired = 4
         result = sizeof(data)
+        self.assertEqual(result, desired)
+
+
+class TestDatatype(unittest.TestCase):
+    def test_basic(self):
+        node = Identifier(name="foo")
+        environment = {"foo": basic_addr(42)}
+        desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_pointer(self):
+        node = PointerDereference(pointer=Identifier(name="foo"))
+        environment = {"foo": EnvEntry(42, Pointer(Basic()))}
+        desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_array(self):
+        node = ArrayAccess(accessee=Identifier(name="foo"), expr=Constant(42))
+        environment = {"foo": EnvEntry(42, Array(Basic(), 42))}
+        desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_array_pointer(self):
+        node = ArrayAccess(accessee=Identifier(name="foo"), expr=Constant(42))
+        environment = {"foo": EnvEntry(42, Pointer(Basic()))}
+        desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_struct(self):
+        node = StructAccess(
+            accessee=Identifier(name="foo"), field=Identifier(name="bar")
+        )
+        environment = {"foo": EnvEntry(42, Struct(entries=[("bar", Basic())]))}
+        desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_struct_pointer(self):
+        node = StructPointerAccess(
+            pointer=Identifier(name="foo"), field=Identifier(name="bar")
+        )
+        environment = {"foo": EnvEntry(42, Pointer(Struct(entries=[("bar", Basic())])))}
+        desired = Basic()
+        result = datatype(node, environment)
         self.assertEqual(result, desired)
 
 
