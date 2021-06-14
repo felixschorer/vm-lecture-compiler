@@ -127,7 +127,19 @@ C.Operation = infixNotation(
     ],
 )
 
-C.LeftHandSide = C.Identifier + ZeroOrMore(
+
+@parse_action_for(C.PointerDereference)
+@dataclass(frozen=True)
+class PointerDereference:
+    pointer: Any
+
+
+C.PointerDereference = (Suppress("*") + C.Identifier) | in_brackets(
+    "*(", C.LeftHandSide, ")"
+)
+
+
+C.LeftHandSide = (C.Identifier | C.PointerDereference) + ZeroOrMore(
     ("[" + C.Expression + "]") | ("->" + C.Identifier) | ("." + C.Identifier)
 )
 

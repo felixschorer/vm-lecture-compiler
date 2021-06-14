@@ -16,6 +16,7 @@ from cma.frontend import (
     Identifier,
     IfElse,
     PlainStatement,
+    PointerDereference,
     StatementSequence,
     StructAccess,
     StructPointerAccess,
@@ -199,6 +200,22 @@ class TestLeftHandSide(unittest.TestCase):
                 pointer=Identifier(name="foo"), field=Identifier(name="bar")
             ),
         )
+        self.assertEqual(result, desired)
+
+    def test_simple_pointer_deref(self):
+        data = "*(foo->bar)"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = PointerDereference(
+            pointer=StructPointerAccess(
+                pointer=Identifier(name="foo"), field=Identifier(name="bar")
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_simple_identifier_deref(self):
+        data = "*bar"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = PointerDereference(pointer=Identifier(name="bar"))
         self.assertEqual(result, desired)
 
     def test_complex_left_hand_side(self):
