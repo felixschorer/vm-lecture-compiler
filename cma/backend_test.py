@@ -32,7 +32,6 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
         c_code = "x = y - 1"
         environment = {"x": basic_addr(4), "y": basic_addr(7)}
         result = generate_expression_code(c_code, environment)
-        print(result)
         desired = ["loadc 7", "load", "loadc 1", "sub", "loadc 4", "store"]
         self.assertEqual(result, desired)
 
