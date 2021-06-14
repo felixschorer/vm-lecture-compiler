@@ -4,6 +4,7 @@ from cma.backend import (
     Array,
     Basic,
     EnvEntry,
+    Pointer,
     Struct,
     code,
     code_r,
@@ -38,13 +39,13 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
 
 class TestSizeof(unittest.TestCase):
     def test_array_of_stucts(self):
-        data = Array(Struct([("a", Basic()), ("b", Basic())]), 5)
+        data = Array(Struct([("a", Basic()), ("b", Pointer(Basic()))]), 5)
         desired = 10
         result = sizeof(data)
         self.assertEqual(result, desired)
 
     def test_struct_containing_array(self):
-        data = Struct([("a", Array(Basic(), 3)), ("b", Basic())])
+        data = Struct([("a", Array(Basic(), 3)), ("b", Pointer(Basic()))])
         desired = 4
         result = sizeof(data)
         self.assertEqual(result, desired)

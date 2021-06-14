@@ -22,7 +22,7 @@ class SymbolicAddress:
     pass
 
 
-Datatype = Union["Array", "Basic", "Struct"]
+Datatype = Union["Array", "Basic", "Struct", "Pointer"]
 
 
 @dataclass(frozen=True)
@@ -41,6 +41,11 @@ class Array:
 @dataclass(frozen=True)
 class Basic:
     pass
+
+
+@dataclass(frozen=True)
+class Pointer:
+    datatype: Datatype
 
 
 @dataclass(frozen=True)
@@ -192,7 +197,7 @@ def code(node: Any, environment: Dict[str, EnvEntry]):
 
 
 def sizeof(t: Datatype):
-    if isinstance(t, Basic):
+    if isinstance(t, Basic) or isinstance(t, Pointer):
         return 1
     elif isinstance(t, Array):
         return sizeof(t.datatype) * t.length
