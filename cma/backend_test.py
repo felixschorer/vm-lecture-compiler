@@ -45,7 +45,7 @@ class TestSizeof(unittest.TestCase):
         self.assertEqual(result, desired)
 
     def test_struct_containing_array(self):
-        data = Struct([("a", Array(Basic(), 3)),("b", Basic())])
+        data = Struct([("a", Array(Basic(), 3)), ("b", Basic())])
         desired = 4
         result = sizeof(data)
         self.assertEqual(result, desired)

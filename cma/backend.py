@@ -65,7 +65,6 @@ BINARY_OP_TO_INSTR = {
     "||": "or",
 }
 
-
 UNARY_OP_TO_INSTR = {"-": "neg", "!": "not"}
 
 

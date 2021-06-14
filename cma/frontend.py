@@ -29,7 +29,6 @@ def in_brackets(opening: str, parser_element: ParserElement, closing: str):
 
 C = Namespace()
 
-
 C.FOR = Keyword("for")
 C.WHILE = Keyword("while")
 C.SWITCH = Keyword("switch")
@@ -188,7 +187,7 @@ class While:
 
 
 C.ForExpressions = (
-    C.Expression + Suppress(";") + C.Expression + Suppress(";") + C.Expression
+        C.Expression + Suppress(";") + C.Expression + Suppress(";") + C.Expression
 )
 C.For = Suppress("for") + in_brackets("(", C.ForExpressions, ")") + C.BlockOrStatement
 
@@ -203,11 +202,11 @@ class For:
 
 
 C.Case = (
-    Suppress("case")
-    + C.Constant
-    + Suppress(":")
-    + C.StatementSequence
-    + Suppress("break;")
+        Suppress("case")
+        + C.Constant
+        + Suppress(":")
+        + C.StatementSequence
+        + Suppress("break;")
 )
 
 
@@ -227,9 +226,9 @@ class Cases(Container):
 
 
 C.Switch = (
-    Suppress("switch")
-    + in_brackets("(", C.Expression, ")")
-    + in_brackets("{", C.Cases + Suppress("default:") + C.StatementSequence, "}")
+        Suppress("switch")
+        + in_brackets("(", C.Expression, ")")
+        + in_brackets("{", C.Cases + Suppress("default:") + C.StatementSequence, "}")
 )
 
 
