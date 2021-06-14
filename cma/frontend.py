@@ -146,8 +146,8 @@ class StructAccess:
 
 @dataclass(frozen=True)
 class StructPointerAccess:
-    accessee: Any
-    pointer: Identifier
+    pointer: Any
+    field: Identifier
 
 
 @parse_action_for(C.LeftHandSide)

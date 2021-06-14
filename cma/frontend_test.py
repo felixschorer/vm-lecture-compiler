@@ -184,7 +184,7 @@ class TestLeftHandSide(unittest.TestCase):
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = Assignment(
             left=StructPointerAccess(
-                accessee=Identifier(name="foo"), pointer=Identifier(name="bar")
+                pointer=Identifier(name="foo"), field=Identifier(name="bar")
             ),
             right=Constant(value=42),
         )
@@ -196,7 +196,7 @@ class TestLeftHandSide(unittest.TestCase):
         desired = Assignment(
             left=Identifier(name="b"),
             right=StructPointerAccess(
-                accessee=Identifier(name="foo"), pointer=Identifier(name="bar")
+                pointer=Identifier(name="foo"), field=Identifier(name="bar")
             ),
         )
         self.assertEqual(result, desired)
@@ -209,8 +209,8 @@ class TestLeftHandSide(unittest.TestCase):
                 accessee=StructAccess(
                     accessee=ArrayAccess(
                         accessee=StructPointerAccess(
-                            accessee=Identifier(name="foo"),
-                            pointer=Identifier(name="bar"),
+                            pointer=Identifier(name="foo"),
+                            field=Identifier(name="bar"),
                         ),
                         expr=Constant(value=42),
                     ),
