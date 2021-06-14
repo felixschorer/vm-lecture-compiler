@@ -1,9 +1,10 @@
 from collections import deque
-from typing import Any, Dict, Union, List, Tuple
-from weakref import WeakKeyDictionary
 from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple, Union
+from weakref import WeakKeyDictionary
 
 from cma.frontend import (
+    ArrayAccess,
     Assignment,
     BinaryOp,
     Constant,
@@ -11,7 +12,10 @@ from cma.frontend import (
     Identifier,
     IfElse,
     PlainStatement,
+    PointerDereference,
     StatementSequence,
+    StructAccess,
+    StructPointerAccess,
     Switch,
     UnaryOp,
     While,
@@ -51,6 +55,12 @@ class Pointer:
 @dataclass(frozen=True)
 class Struct:
     entries: List[Tuple[str, Datatype]]
+
+    def entry(self, name: str) -> Datatype:
+        for member_name, member_type in self.entries:
+            if name == member_name:
+                return member_type
+        raise AssertionError(f"Field {name} does not exist on struct {repr(self)}")
 
 
 BINARY_OP_TO_INSTR = {
@@ -203,6 +213,39 @@ def sizeof(t: Datatype):
         return sizeof(t.datatype) * t.length
     elif isinstance(t, Struct):
         return sum(sizeof(entry) for _, entry in t.entries)
+
+
+def datatype(node: Any, environment: Dict[str, EnvEntry]):
+    if isinstance(node, Identifier):
+        return environment[node.name].datatype
+    elif isinstance(node, PointerDereference):
+        pointer_type = datatype(node.pointer, environment)
+        if not isinstance(pointer_type, Pointer):
+            raise AssertionError(f"Expected {repr(node)} to be a pointer")
+        return pointer_type.datatype
+    elif isinstance(node, ArrayAccess):
+        array_or_pointer_type = datatype(node.accessee, environment)
+        if not (
+            isinstance(array_or_pointer_type, Pointer)
+            or isinstance(array_or_pointer_type, Array)
+        ):
+            raise AssertionError(f"Expected {repr(node)} to be a pointer or array")
+        return array_or_pointer_type.datatype
+    elif isinstance(node, StructAccess):
+        struct_type = datatype(node.accessee, environment)
+        if not isinstance(struct_type, Struct):
+            raise AssertionError(f"Expected {repr(node)} to be a struct")
+        return struct_type.entry(node.field.name)
+    elif isinstance(node, StructPointerAccess):
+        struct_pointer_type = datatype(node.pointer, environment)
+        if not (
+            isinstance(struct_pointer_type, Pointer)
+            and isinstance(struct_pointer_type.datatype, Struct)
+        ):
+            raise AssertionError(f"Expected {repr(node)} to be a struct")
+        return struct_pointer_type.datatype.entry(node.field.name)
+    else:
+        raise AssertionError(f"{repr(node)} is not a left hand side expression")
 
 
 def render_symbolic_addresses(symbolic_code):
