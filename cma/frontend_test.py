@@ -3,6 +3,7 @@ import unittest
 from pyparsing import ParseException
 
 from cma.frontend import (
+    ArrayAccess,
     Assignment,
     BinaryOp,
     C,
@@ -19,7 +20,6 @@ from cma.frontend import (
     Switch,
     UnaryOp,
     While,
-    ArrayAccess,
 )
 
 
@@ -141,7 +141,7 @@ class TestArrayAccess(unittest.TestCase):
         data = "a[2] = 42"
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = Assignment(
-            left=ArrayAccess(identifier=Identifier(name="a"), expr=Constant(value=2)),
+            left=ArrayAccess(accessee=Identifier(name="a"), expr=Constant(value=2)),
             right=Constant(value=42),
         )
         self.assertEqual(result, desired)
@@ -151,7 +151,7 @@ class TestArrayAccess(unittest.TestCase):
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = Assignment(
             left=Identifier(name="b"),
-            right=ArrayAccess(identifier=Identifier(name="a"), expr=Constant(value=1)),
+            right=ArrayAccess(accessee=Identifier(name="a"), expr=Constant(value=1)),
         )
         self.assertEqual(result, desired)
 
