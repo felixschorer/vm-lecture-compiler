@@ -74,7 +74,7 @@ class FuncCall:
     arguments: FuncCallArguments
 
 
-C.Operand = C.FuncCall | C.Constant | C.ArrayAccess | C.Identifier
+C.Operand = C.FuncCall | C.Constant | C.LeftHandSide
 
 
 def ungroup(groups):
@@ -127,17 +127,42 @@ C.Operation = infixNotation(
     ],
 )
 
-C.ArrayAccess = C.Identifier + in_brackets("[", C.Expression, "]")
+C.LeftHandSide = C.Identifier + ZeroOrMore(
+    ("[" + C.Expression + "]") | ("->" + C.Identifier) | ("." + C.Identifier)
+)
 
 
-@parse_action_for(C.ArrayAccess)
 @dataclass(frozen=True)
 class ArrayAccess:
-    identifier: Identifier
+    accessee: Any
     expr: Any
 
 
-C.LeftHandSide = C.ArrayAccess | C.Identifier
+@dataclass(frozen=True)
+class StructAccess:
+    accessee: Any
+    field: Identifier
+
+
+@dataclass(frozen=True)
+class StructPointerAccess:
+    accessee: Any
+    pointer: Identifier
+
+
+@parse_action_for(C.LeftHandSide)
+def parse_left_hand_side(*tokens):
+    while len(tokens) != 1:
+        if tokens[1] == "[":
+            tokens = [ArrayAccess(tokens[0], tokens[2]), *tokens[4:]]
+        elif tokens[1] == "->":
+            tokens = [StructPointerAccess(tokens[0], tokens[2]), *tokens[3:]]
+        elif tokens[1] == ".":
+            tokens = [StructAccess(tokens[0], tokens[2]), *tokens[3:]]
+        else:
+            raise AssertionError("Unsupported left hand side")
+    return tokens[0]
+
 
 C.Assignment = C.LeftHandSide + Suppress("=") + C.Expression
 
