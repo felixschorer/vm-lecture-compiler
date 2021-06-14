@@ -17,6 +17,8 @@ from cma.frontend import (
     IfElse,
     PlainStatement,
     StatementSequence,
+    StructAccess,
+    StructPointerAccess,
     Switch,
     UnaryOp,
     While,
@@ -136,7 +138,7 @@ class TestParserFuncCall(unittest.TestCase):
         self.assertEqual(result, desired)
 
 
-class TestArrayAccess(unittest.TestCase):
+class TestLeftHandSide(unittest.TestCase):
     def test_simple_array_assignment(self):
         data = "a[2] = 42"
         (result,) = C.Expression.parseString(data, parseAll=True)
@@ -152,6 +154,71 @@ class TestArrayAccess(unittest.TestCase):
         desired = Assignment(
             left=Identifier(name="b"),
             right=ArrayAccess(accessee=Identifier(name="a"), expr=Constant(value=1)),
+        )
+        self.assertEqual(result, desired)
+
+    def test_simple_struct_assignment(self):
+        data = "foo.bar = 42"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(
+            left=StructAccess(
+                accessee=Identifier(name="foo"), field=Identifier(name="bar")
+            ),
+            right=Constant(value=42),
+        )
+        self.assertEqual(result, desired)
+
+    def test_simple_struct_access(self):
+        data = "b = foo.bar"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(
+            left=Identifier(name="b"),
+            right=StructAccess(
+                accessee=Identifier(name="foo"), field=Identifier(name="bar")
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_simple_struct_pointer_assignment(self):
+        data = "foo->bar = 42"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(
+            left=StructPointerAccess(
+                accessee=Identifier(name="foo"), pointer=Identifier(name="bar")
+            ),
+            right=Constant(value=42),
+        )
+        self.assertEqual(result, desired)
+
+    def test_simple_struct_pointer_access(self):
+        data = "b = foo->bar"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = Assignment(
+            left=Identifier(name="b"),
+            right=StructPointerAccess(
+                accessee=Identifier(name="foo"), pointer=Identifier(name="bar")
+            ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_complex_left_hand_side(self):
+        data = "foo->bar[42].baz[1][2]"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = ArrayAccess(
+            accessee=ArrayAccess(
+                accessee=StructAccess(
+                    accessee=ArrayAccess(
+                        accessee=StructPointerAccess(
+                            accessee=Identifier(name="foo"),
+                            pointer=Identifier(name="bar"),
+                        ),
+                        expr=Constant(value=42),
+                    ),
+                    field=Identifier(name="baz"),
+                ),
+                expr=Constant(value=1),
+            ),
+            expr=Constant(value=2),
         )
         self.assertEqual(result, desired)
 
