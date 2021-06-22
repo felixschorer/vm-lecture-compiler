@@ -100,15 +100,13 @@ def code_r(node: Any, environment: Dict[str, EnvEntry]):
         yield UNARY_OP_TO_INSTR[node.op]
     elif isinstance(node, Constant):
         yield f"loadc {node.value}"
-    elif isinstance(node, Identifier):
-        yield from code_l(node, environment)
-        yield "load"
     elif isinstance(node, Assignment):
         yield from code_r(node.right, environment)
         yield from code_l(node.left, environment)
         yield "store"
     else:
-        raise AssertionError(f"Cannot generate code_r for {repr(node)}")
+        yield from code_l(node, environment)
+        yield "load"
 
 
 def check(start: int, end: int, b: SymbolicAddress):
