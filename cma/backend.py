@@ -213,7 +213,7 @@ def code(node: Any, environment: Dict[str, EnvEntry]):
 
 
 def sizeof(t: Datatype):
-    if isinstance(t, Basic) or isinstance(t, Pointer):
+    if isinstance(t, (Basic, Pointer)):
         return 1
     elif isinstance(t, Array):
         return sizeof(t.datatype) * t.length
