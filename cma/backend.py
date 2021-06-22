@@ -225,10 +225,7 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
         return pointer_type.datatype
     elif isinstance(node, ArrayAccess):
         array_or_pointer_type = datatype(node.accessee, environment)
-        if not (
-            isinstance(array_or_pointer_type, Pointer)
-            or isinstance(array_or_pointer_type, Array)
-        ):
+        if not isinstance(array_or_pointer_type, (Pointer, Array)):
             raise AssertionError(f"Expected {repr(node)} to be a pointer or array")
         return array_or_pointer_type.datatype
     elif isinstance(node, StructAccess):
