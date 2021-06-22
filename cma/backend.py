@@ -86,12 +86,20 @@ UNARY_OP_TO_INSTR = {"-": "neg", "!": "not"}
 def code_l(node: Any, environment: Dict[str, EnvEntry]):
     if isinstance(node, Identifier):
         yield f"loadc {environment[node.name].address}"
+    elif isinstance(node, ArrayAccess):
+        yield from code_r(node.accessee, environment)
+        yield from code_r(node.expr, environment)
+        yield f"loadc {sizeof(datatype(node, environment))}"
+        yield "mul"
+        yield "add"
     else:
         raise AssertionError(f"Cannot generate code_l for {repr(node)}")
 
 
 def code_r(node: Any, environment: Dict[str, EnvEntry]):
-    if isinstance(node, BinaryOp):
+    if isinstance(datatype(node, environment), (Array, Pointer)):
+        yield from code_l(node, environment)
+    elif isinstance(node, BinaryOp):
         yield from code_r(node.left, environment)
         yield from code_r(node.right, environment)
         yield BINARY_OP_TO_INSTR[node.op]
@@ -240,7 +248,7 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
         return struct_pointer_type.datatype.entry(node.field.name)
     else:
-        raise AssertionError(f"{repr(node)} is not a left hand side expression")
+        return Basic()
 
 
 def render_symbolic_addresses(symbolic_code):

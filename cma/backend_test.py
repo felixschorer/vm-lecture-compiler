@@ -263,3 +263,12 @@ class TestStatementCodeGeneration(unittest.TestCase):
             "jump 19",
         ]
         self.assertEqual(result, desired)
+
+
+class TestDataStructure(unittest.TestCase):
+    def test_array_access(self):
+        c_code = "foo[42]"
+        environment = {"foo": EnvEntry(2, Array(Basic(), 100))}
+        result = generate_expression_code(c_code, environment)
+        desired = ["loadc 2", "loadc 42", "loadc 1", "mul", "add", "load"]
+        self.assertEqual(result, desired)
