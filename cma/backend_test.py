@@ -272,3 +272,10 @@ class TestDataStructure(unittest.TestCase):
         result = generate_expression_code(c_code, environment)
         desired = ["loadc 2", "loadc 42", "loadc 1", "mul", "add", "load"]
         self.assertEqual(result, desired)
+
+    def test_struct_access(self):
+        c_code = "x.b"
+        environment = {"x": EnvEntry(13, Struct(("a", Basic()), ("b", Basic())))}
+        result = generate_expression_code(c_code, environment)
+        desired = ["loadc 13", "loadc 1", "add", "load"]
+        self.assertEqual(result, desired)

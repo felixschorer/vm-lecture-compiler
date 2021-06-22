@@ -96,6 +96,10 @@ def code_l(node: Any, environment: Dict[str, EnvEntry]):
         yield f"loadc {sizeof(datatype(node, environment))}"
         yield "mul"
         yield "add"
+    elif isinstance(node, StructAccess):
+        yield from code_l(node.accessee, environment)
+        yield f"loadc {datatype(node.accessee, environment).fields[node.field.name].offset}"
+        yield "add"
     else:
         raise AssertionError(f"Cannot generate code_l for {repr(node)}")
 
