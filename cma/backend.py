@@ -97,7 +97,7 @@ def code_l(node: Any, environment: Dict[str, EnvEntry]):
 
 
 def code_r(node: Any, environment: Dict[str, EnvEntry]):
-    if isinstance(datatype(node, environment), (Array, Pointer)):
+    if isinstance(datatype(node, environment), Array):
         yield from code_l(node, environment)
     elif isinstance(node, BinaryOp):
         yield from code_r(node.left, environment)
