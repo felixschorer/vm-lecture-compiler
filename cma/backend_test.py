@@ -48,13 +48,13 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
 
 class TestSizeof(unittest.TestCase):
     def test_array_of_stucts(self):
-        data = Array(Struct([("a", Basic()), ("b", Pointer(Basic()))]), 5)
+        data = Array(Struct(("a", Basic()), ("b", Pointer(Basic()))), 5)
         desired = 10
         result = sizeof(data)
         self.assertEqual(result, desired)
 
     def test_struct_containing_array(self):
-        data = Struct([("a", Array(Basic(), 3)), ("b", Pointer(Basic()))])
+        data = Struct(("a", Array(Basic(), 3)), ("b", Pointer(Basic())))
         desired = 4
         result = sizeof(data)
         self.assertEqual(result, desired)
@@ -93,7 +93,7 @@ class TestDatatype(unittest.TestCase):
         node = StructAccess(
             accessee=Identifier(name="foo"), field=Identifier(name="bar")
         )
-        environment = {"foo": EnvEntry(42, Struct(entries=[("bar", Basic())]))}
+        environment = {"foo": EnvEntry(42, Struct(("bar", Basic())))}
         desired = Basic()
         result = datatype(node, environment)
         self.assertEqual(result, desired)
@@ -102,7 +102,7 @@ class TestDatatype(unittest.TestCase):
         node = StructPointerAccess(
             pointer=Identifier(name="foo"), field=Identifier(name="bar")
         )
-        environment = {"foo": EnvEntry(42, Pointer(Struct(entries=[("bar", Basic())])))}
+        environment = {"foo": EnvEntry(42, Pointer(Struct(("bar", Basic()))))}
         desired = Basic()
         result = datatype(node, environment)
         self.assertEqual(result, desired)

@@ -53,14 +53,18 @@ class Pointer:
 
 
 @dataclass(frozen=True)
-class Struct:
-    entries: List[Tuple[str, Datatype]]
+class StructEntry:
+    offset: int
+    datatype: Datatype
 
-    def entry(self, name: str) -> Datatype:
-        for member_name, member_type in self.entries:
-            if name == member_name:
-                return member_type
-        raise AssertionError(f"Field {name} does not exist on struct {repr(self)}")
+
+class Struct:
+    def __init__(self, *fields: Tuple[str, Datatype]):
+        self.fields: Dict[str, StructEntry] = {}
+        offset = 0
+        for name, field_type in fields:
+            self.fields[name] = StructEntry(offset, field_type)
+            offset += sizeof(field_type)
 
 
 BINARY_OP_TO_INSTR = {
@@ -218,7 +222,7 @@ def sizeof(t: Datatype):
     elif isinstance(t, Array):
         return sizeof(t.datatype) * t.length
     elif isinstance(t, Struct):
-        return sum(sizeof(entry) for _, entry in t.entries)
+        return sum(sizeof(entry.datatype) for entry in t.fields.values())
 
 
 def datatype(node: Any, environment: Dict[str, EnvEntry]):
@@ -238,7 +242,7 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
         struct_type = datatype(node.accessee, environment)
         if not isinstance(struct_type, Struct):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
-        return struct_type.entry(node.field.name)
+        return struct_type.fields[node.field.name].datatype
     elif isinstance(node, StructPointerAccess):
         struct_pointer_type = datatype(node.pointer, environment)
         if not (
@@ -246,7 +250,7 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
             and isinstance(struct_pointer_type.datatype, Struct)
         ):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
-        return struct_pointer_type.datatype.entry(node.field.name)
+        return struct_pointer_type.datatype.fields[node.field.name].datatype
     else:
         return Basic()
 
