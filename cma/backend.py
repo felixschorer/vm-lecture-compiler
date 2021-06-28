@@ -125,6 +125,8 @@ def code_r(node: Any, environment: Dict[str, EnvEntry]):
     elif isinstance(node, MallocCall):
         yield from code_r(node.expr, environment)
         yield "new"
+    elif isinstance(node, AddressOf):
+        yield from code_l(node.value, environment)
     else:
         yield from code_l(node, environment)
         yield "load"
