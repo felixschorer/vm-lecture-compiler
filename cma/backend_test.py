@@ -46,6 +46,15 @@ class TestArithmeticCodeGeneration(unittest.TestCase):
         self.assertEqual(result, desired)
 
 
+class TestExpressionCodeGeneration(unittest.TestCase):
+    def test_malloc_call(self):
+        c_code = "malloc(1 + a)"
+        environment = {"a": basic_addr(4)}
+        result = generate_expression_code(c_code, environment)
+        desired = ["loadc 1", "loadc 4", "load", "add", "new"]
+        self.assertEqual(result, desired)
+
+
 class TestSizeof(unittest.TestCase):
     def test_array_of_stucts(self):
         data = Array(Struct(("a", Basic()), ("b", Pointer(Basic()))), 5)

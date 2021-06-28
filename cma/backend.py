@@ -11,6 +11,7 @@ from cma.frontend import (
     For,
     Identifier,
     IfElse,
+    MallocCall,
     PlainStatement,
     PointerDereference,
     StatementSequence,
@@ -120,6 +121,9 @@ def code_r(node: Any, environment: Dict[str, EnvEntry]):
         yield from code_r(node.right, environment)
         yield from code_l(node.left, environment)
         yield "store"
+    elif isinstance(node, MallocCall):
+        yield from code_r(node.expr, environment)
+        yield "new"
     else:
         yield from code_l(node, environment)
         yield "load"
