@@ -144,8 +144,8 @@ class PointerDereference:
     pointer: Any
 
 
-C.PointerDereference = (Suppress("*") + C.Identifier) | in_brackets(
-    "*(", C.LeftHandSide, ")"
+C.PointerDereference = (Suppress("*") + C.LeftHandSide) | in_brackets(
+    "(*", C.LeftHandSide, ")"
 )
 
 
