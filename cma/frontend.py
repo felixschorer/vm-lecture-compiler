@@ -137,6 +137,10 @@ C.Operation = infixNotation(
     ],
 )
 
+C.PointerDereference = (Suppress("*") + C.LeftHandSide) | in_brackets(
+    "(*", C.LeftHandSide, ")"
+)
+
 
 @parse_action_for(C.PointerDereference)
 @dataclass(frozen=True)
@@ -144,12 +148,16 @@ class PointerDereference:
     pointer: Any
 
 
-C.PointerDereference = (Suppress("*") + C.LeftHandSide) | in_brackets(
-    "(*", C.LeftHandSide, ")"
-)
+C.AddressOf = (Suppress("&") + C.LeftHandSide) | in_brackets("(&", C.LeftHandSide, ")")
 
 
-C.LeftHandSide = (C.Identifier | C.PointerDereference) + ZeroOrMore(
+@parse_action_for(C.AddressOf)
+@dataclass(frozen=True)
+class AddressOf:
+    value: Any
+
+
+C.LeftHandSide = (C.Identifier | C.PointerDereference | C.AddressOf) + ZeroOrMore(
     ("[" + C.Expression + "]") | ("->" + C.Identifier) | ("." + C.Identifier)
 )
 

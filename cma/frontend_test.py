@@ -3,6 +3,7 @@ import unittest
 from pyparsing import ParseException
 
 from cma.frontend import (
+    AddressOf,
     ArrayAccess,
     Assignment,
     BinaryOp,
@@ -219,11 +220,11 @@ class TestLeftHandSide(unittest.TestCase):
         desired = PointerDereference(
             pointer=StructPointerAccess(
                 pointer=Identifier(name="foo"), field=Identifier(name="bar")
-            ),
+            )
         )
         self.assertEqual(result, desired)
 
-    def test_simple_identifier_deref(self):
+    def test_backeted_pointer_deref(self):
         data = "(*foo)->bar"
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = StructPointerAccess(
@@ -232,20 +233,41 @@ class TestLeftHandSide(unittest.TestCase):
         )
         self.assertEqual(result, desired)
 
+    def test_simple_address_of(self):
+        data = "&foo->bar"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = AddressOf(
+            value=StructPointerAccess(
+                pointer=Identifier(name="foo"), field=Identifier(name="bar")
+            )
+        )
+        self.assertEqual(result, desired)
+
+    def test_bracketed_address_of(self):
+        data = "(&foo)->bar"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = StructPointerAccess(
+            pointer=AddressOf(value=Identifier(name="foo")),
+            field=Identifier(name="bar"),
+        )
+        self.assertEqual(result, desired)
+
     def test_complex_left_hand_side(self):
-        data = "foo->bar[42].baz[1][2]"
+        data = "(&foo->bar[42].baz)[1][2]"
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = ArrayAccess(
             accessee=ArrayAccess(
-                accessee=StructAccess(
-                    accessee=ArrayAccess(
-                        accessee=StructPointerAccess(
-                            pointer=Identifier(name="foo"),
-                            field=Identifier(name="bar"),
+                accessee=AddressOf(
+                    value=StructAccess(
+                        accessee=ArrayAccess(
+                            accessee=StructPointerAccess(
+                                pointer=Identifier(name="foo"),
+                                field=Identifier(name="bar"),
+                            ),
+                            expr=Constant(value=42),
                         ),
-                        expr=Constant(value=42),
-                    ),
-                    field=Identifier(name="baz"),
+                        field=Identifier(name="baz"),
+                    )
                 ),
                 expr=Constant(value=1),
             ),
