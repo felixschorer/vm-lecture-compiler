@@ -65,7 +65,7 @@ class FuncCallArguments(Container):
     pass
 
 
-C.FuncCall = C.Identifier + Suppress("(") + C.FuncCallArguments + Suppress(")")
+C.FuncCall = C.Identifier + in_brackets("(", C.FuncCallArguments, ")")
 
 
 @parse_action_for(C.FuncCall)
