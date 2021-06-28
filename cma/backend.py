@@ -102,6 +102,8 @@ def code_l(node: Any, environment: Dict[str, EnvEntry]):
         yield from code_l(node.accessee, environment)
         yield f"loadc {datatype(node.accessee, environment).fields[node.field.name].offset}"
         yield "add"
+    elif isinstance(node, PointerDereference):
+        yield from code_r(node.pointer, environment)
     else:
         raise AssertionError(f"Cannot generate code_l for {repr(node)}")
 
