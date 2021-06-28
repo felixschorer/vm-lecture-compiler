@@ -35,8 +35,9 @@ C.SWITCH = Keyword("switch")
 C.CASE = Keyword("case")
 C.BREAK = Keyword("break")
 C.DEFAULT = Keyword("default")
+C.MALLOC = Keyword("malloc")
 
-C.Keyword = C.FOR | C.WHILE | C.SWITCH | C.CASE | C.BREAK | C.DEFAULT
+C.Keyword = C.FOR | C.WHILE | C.SWITCH | C.CASE | C.BREAK | C.DEFAULT | C.MALLOC
 
 C.Constant = pyparsing_common.integer
 
@@ -74,7 +75,16 @@ class FuncCall:
     arguments: FuncCallArguments
 
 
-C.Operand = C.FuncCall | C.Constant | C.LeftHandSide
+C.MallocCall = Suppress(C.MALLOC) + in_brackets("(", C.Expression, ")")
+
+
+@parse_action_for(C.MallocCall)
+@dataclass(frozen=True)
+class MallocCall:
+    expr: Any
+
+
+C.Operand = C.FuncCall | C.Constant | C.LeftHandSide | C.MallocCall
 
 
 def ungroup(groups):

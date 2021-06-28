@@ -15,6 +15,7 @@ from cma.frontend import (
     FuncCallArguments,
     Identifier,
     IfElse,
+    MallocCall,
     PlainStatement,
     PointerDereference,
     StatementSequence,
@@ -83,6 +84,16 @@ class TestParserUnaryOp(unittest.TestCase):
         data = "-1"
         (result,) = C.Expression.parseString(data, parseAll=True)
         desired = UnaryOp(op="-", expr=Constant(value=1))
+        self.assertEqual(result, desired)
+
+
+class TestParserExpression(unittest.TestCase):
+    def test_malloc_call(self):
+        data = "malloc(1 + a)"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        desired = MallocCall(
+            expr=BinaryOp(left=Constant(value=1), op="+", right=Identifier(name="a"))
+        )
         self.assertEqual(result, desired)
 
 
