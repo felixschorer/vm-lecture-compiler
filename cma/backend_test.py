@@ -13,6 +13,7 @@ from cma.backend import (
     sizeof,
 )
 from cma.frontend import (
+    AddressOf,
     ArrayAccess,
     C,
     Constant,
@@ -113,6 +114,13 @@ class TestDatatype(unittest.TestCase):
         )
         environment = {"foo": EnvEntry(42, Pointer(Struct(("bar", Basic()))))}
         desired = Basic()
+        result = datatype(node, environment)
+        self.assertEqual(result, desired)
+
+    def test_address_of(self):
+        node = AddressOf(value=Identifier(name="foo"))
+        environment = {"foo": basic_addr(42)}
+        desired = Pointer(Basic())
         result = datatype(node, environment)
         self.assertEqual(result, desired)
 

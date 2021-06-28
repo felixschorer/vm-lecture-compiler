@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple, Union
 from weakref import WeakKeyDictionary
 
 from cma.frontend import (
+    AddressOf,
     ArrayAccess,
     Assignment,
     BinaryOp,
@@ -241,6 +242,9 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
         if not isinstance(pointer_type, Pointer):
             raise AssertionError(f"Expected {repr(node)} to be a pointer")
         return pointer_type.datatype
+    elif isinstance(node, AddressOf):
+        value_type = datatype(node.value, environment)
+        return Pointer(value_type)
     elif isinstance(node, ArrayAccess):
         array_or_pointer_type = datatype(node.accessee, environment)
         if not isinstance(array_or_pointer_type, (Pointer, Array)):
