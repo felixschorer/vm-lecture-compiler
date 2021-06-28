@@ -296,3 +296,12 @@ class TestDataStructure(unittest.TestCase):
         result = generate_expression_code(c_code, environment)
         desired = ["loadc 13", "loadc 1", "add", "load"]
         self.assertEqual(result, desired)
+
+    def test_pointer_struct_access(self):
+        c_code = "x -> b"
+        environment = {
+            "x": EnvEntry(13, Pointer(Struct(("a", Basic()), ("b", Basic()))))
+        }
+        result = generate_expression_code(c_code, environment)
+        desired = ["loadc 13", "load", "loadc 1", "add", "load"]
+        self.assertEqual(result, desired)
