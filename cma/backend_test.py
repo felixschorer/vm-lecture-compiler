@@ -4,6 +4,7 @@ from cma.backend import (
     Array,
     Basic,
     EnvEntry,
+    LazyStruct,
     Pointer,
     Struct,
     code,
@@ -304,4 +305,31 @@ class TestDataStructure(unittest.TestCase):
         }
         result = generate_expression_code(c_code, environment)
         desired = ["loadc 13", "load", "loadc 1", "add", "load"]
+        self.assertEqual(result, desired)
+
+    def test_complex_access(self):
+        c_code = "pt->b->a[i+1]"
+        structs = {}
+        structs["foo"] = Struct(
+            ("a", Array(Basic(), 7)), ("b", Pointer(LazyStruct(lambda: structs["foo"])))
+        )
+        environment = {"i": basic_addr(1), "pt": EnvEntry(3, Pointer(structs["foo"]))}
+        result = generate_expression_code(c_code, environment)
+        desired = [
+            "loadc 3",
+            "load",
+            "loadc 7",
+            "add",
+            "load",
+            "loadc 0",
+            "add",
+            "loadc 1",
+            "load",
+            "loadc 1",
+            "add",
+            "loadc 1",
+            "mul",
+            "add",
+            "load",
+        ]
         self.assertEqual(result, desired)

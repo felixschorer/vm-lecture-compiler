@@ -278,7 +278,6 @@ class TestLeftHandSide(unittest.TestCase):
     def test_complex_left_hand_side_from_slides(self):
         data = "pt->b->a[i+1]"
         (result,) = C.Expression.parseString(data, parseAll=True)
-        print(result)
         desired = ArrayAccess(
             accessee=StructPointerAccess(
                 pointer=StructPointerAccess(

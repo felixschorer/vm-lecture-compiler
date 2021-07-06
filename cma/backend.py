@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 from weakref import WeakKeyDictionary
 
 from cma.frontend import (
@@ -28,7 +28,7 @@ class SymbolicAddress:
     pass
 
 
-Datatype = Union["Array", "Basic", "Struct", "Pointer"]
+Datatype = Union["Array", "Basic", "Struct", "Pointer", "StructByName"]
 
 
 @dataclass(frozen=True)
@@ -67,6 +67,15 @@ class Struct:
         for name, field_type in fields:
             self.fields[name] = StructEntry(offset, field_type)
             offset += sizeof(field_type)
+
+
+@dataclass(frozen=True)
+class LazyStruct:
+    struct: Callable[[], Struct]
+
+    @property
+    def fields(self):
+        return self.struct().fields
 
 
 BINARY_OP_TO_INSTR = {
@@ -238,7 +247,7 @@ def sizeof(t: Datatype):
         return 1
     elif isinstance(t, Array):
         return sizeof(t.datatype) * t.length
-    elif isinstance(t, Struct):
+    elif isinstance(t, (Struct, LazyStruct)):
         return sum(sizeof(entry.datatype) for entry in t.fields.values())
 
 
@@ -260,14 +269,14 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
         return array_or_pointer_type.datatype
     elif isinstance(node, StructAccess):
         struct_type = datatype(node.accessee, environment)
-        if not isinstance(struct_type, Struct):
+        if not isinstance(struct_type, (Struct, LazyStruct)):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
         return struct_type.fields[node.field.name].datatype
     elif isinstance(node, StructPointerAccess):
         struct_pointer_type = datatype(node.pointer, environment)
         if not (
             isinstance(struct_pointer_type, Pointer)
-            and isinstance(struct_pointer_type.datatype, Struct)
+            and isinstance(struct_pointer_type.datatype, (Struct, LazyStruct))
         ):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
         return struct_pointer_type.datatype.fields[node.field.name].datatype
