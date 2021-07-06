@@ -12,6 +12,7 @@ from cma.frontend import (
     Cases,
     Constant,
     For,
+    FreeCall,
     FuncCall,
     FuncCallArguments,
     Identifier,
@@ -427,5 +428,13 @@ class TestParserStatement(unittest.TestCase):
                     expr=Assignment(left=Identifier(name="x"), right=Constant(value=1))
                 )
             ),
+        )
+        self.assertEqual(result, desired)
+
+    def test_free_call(self):
+        data = "free(1 + a);"
+        (result,) = C.Statement.parseString(data, parseAll=True)
+        desired = FreeCall(
+            expr=BinaryOp(left=Constant(value=1), op="+", right=Identifier(name="a"))
         )
         self.assertEqual(result, desired)

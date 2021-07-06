@@ -56,6 +56,13 @@ class TestExpressionCodeGeneration(unittest.TestCase):
         desired = ["loadc 1", "loadc 4", "load", "add", "new"]
         self.assertEqual(result, desired)
 
+    def test_free_call(self):
+        c_code = "free(1 + a);"
+        environment = {"a": basic_addr(4)}
+        result = generate_statement_code(c_code, environment)
+        desired = ["loadc 1", "loadc 4", "load", "add", "pop"]
+        self.assertEqual(result, desired)
+
 
 class TestSizeof(unittest.TestCase):
     def test_array_of_stucts(self):

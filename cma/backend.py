@@ -10,6 +10,7 @@ from cma.frontend import (
     BinaryOp,
     Constant,
     For,
+    FreeCall,
     Identifier,
     IfElse,
     MallocCall,
@@ -238,6 +239,10 @@ def code(node: Any, environment: Dict[str, EnvEntry]):
             yield "jump", c
 
         yield d
+    elif isinstance(node, FreeCall):
+        # noop lulz
+        yield from code_r(node.expr, environment)
+        yield "pop"
     else:
         raise AssertionError(f"Cannot generate code for {repr(node)}")
 

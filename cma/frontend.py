@@ -36,8 +36,11 @@ C.CASE = Keyword("case")
 C.BREAK = Keyword("break")
 C.DEFAULT = Keyword("default")
 C.MALLOC = Keyword("malloc")
+C.FREE = Keyword("free")
 
-C.Keyword = C.FOR | C.WHILE | C.SWITCH | C.CASE | C.BREAK | C.DEFAULT | C.MALLOC
+C.Keyword = (
+    C.FOR | C.WHILE | C.SWITCH | C.CASE | C.BREAK | C.DEFAULT | C.MALLOC | C.FREE
+)
 
 C.Constant = pyparsing_common.integer
 
@@ -81,6 +84,15 @@ C.MallocCall = Suppress(C.MALLOC) + in_brackets("(", C.Expression, ")")
 @parse_action_for(C.MallocCall)
 @dataclass(frozen=True)
 class MallocCall:
+    expr: Any
+
+
+C.FreeCall = Suppress(C.FREE) + in_brackets("(", C.Expression, ");")
+
+
+@parse_action_for(C.FreeCall)
+@dataclass(frozen=True)
+class FreeCall:
     expr: Any
 
 
@@ -295,7 +307,7 @@ class Switch:
     default_case: Any
 
 
-C.Statement = C.PlainStatement | C.IfElse | C.While | C.For | C.Switch
+C.Statement = C.PlainStatement | C.IfElse | C.While | C.For | C.Switch | C.FreeCall
 
 C.StatementSequence = ZeroOrMore(C.Statement)
 
