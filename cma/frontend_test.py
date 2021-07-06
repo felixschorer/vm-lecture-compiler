@@ -275,6 +275,21 @@ class TestLeftHandSide(unittest.TestCase):
         )
         self.assertEqual(result, desired)
 
+    def test_complex_left_hand_side_from_slides(self):
+        data = "pt->b->a[i+1]"
+        (result,) = C.Expression.parseString(data, parseAll=True)
+        print(result)
+        desired = ArrayAccess(
+            accessee=StructPointerAccess(
+                pointer=StructPointerAccess(
+                    pointer=Identifier(name="pt"), field=Identifier(name="b")
+                ),
+                field=Identifier(name="a"),
+            ),
+            expr=BinaryOp(left=Identifier(name="i"), op="+", right=Constant(value=1)),
+        )
+        self.assertEqual(result, desired)
+
 
 class TestParserStatement(unittest.TestCase):
     def test_parse_plain_statement(self):
