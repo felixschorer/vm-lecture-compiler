@@ -286,6 +286,7 @@ def datatype(node: Any, environment: Dict[str, EnvEntry]):
             raise AssertionError(f"Expected {repr(node)} to be a struct")
         return struct_pointer_type.datatype.fields[node.field.name].datatype
     else:
+        # TODO: Handle function return value, e.g. foo(42) -> bar
         return Basic()
 
 

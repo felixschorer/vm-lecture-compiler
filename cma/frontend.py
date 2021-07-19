@@ -169,6 +169,7 @@ class AddressOf:
     value: Any
 
 
+# TODO: In case the LeftHandSide occurs on the right hand side, this should be valid: foo(42) -> bar
 C.LeftHandSide = (C.Identifier | C.PointerDereference | C.AddressOf) + ZeroOrMore(
     ("[" + C.Expression + "]") | ("->" + C.Identifier) | ("." + C.Identifier)
 )
